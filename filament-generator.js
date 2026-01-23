@@ -159,6 +159,49 @@ const filamentGenerator = {
   },
 
   /**
+   * Generate JSON from form data
+   * @param {object} formData - Data from the form
+   * @returns {object} OpenSpool JSON object
+   */
+  generateFromFormData(formData) {
+    const material = formData.material || 'Generic PETG';
+    const brand = formData.brand || 'Generic';
+    const type = formData.type || '';
+    
+    const minNozzle = parseInt(formData.minNozzle) || 230;
+    const maxNozzle = parseInt(formData.maxNozzle) || 250;
+    const minBed = parseInt(formData.minBed) || 70;
+    const maxBed = parseInt(formData.maxBed) || 80;
+
+    // Calculate average temperatures
+    const avgNozzle = Math.round((minNozzle + maxNozzle) / 2);
+    const avgBed = Math.round((minBed + maxBed) / 2);
+
+    // Build filament name
+    const filamentName = `${brand} ${material}${type ? ' ' + type : ''}`;
+
+    // Get inherits value based on material
+    let inheritsValue = `Generic ${material}`;
+    if (this.filamentProfiles[filamentName]) {
+      inheritsValue = this.filamentProfiles[filamentName].inherits;
+    }
+
+    return {
+      filament_settings_id: [filamentName],
+      filament_vendor: [brand],
+      from: 'User',
+      inherits: inheritsValue,
+      is_custom_defined: '0',
+      name: filamentName,
+      nozzle_temperature: [avgNozzle.toString()],
+      nozzle_temperature_initial_layer: [(avgNozzle - 5).toString()],
+      textured_plate_temp: [avgBed.toString()],
+      textured_plate_temp_initial_layer: [(avgBed - 1).toString()],
+      version: '2.2.42.2'
+    };
+  },
+
+  /**
    * Generate JSON for a specific filament
    * @param {string} filamentName - Name of the filament profile
    * @param {string} colorHex - Color hex code (without #)
