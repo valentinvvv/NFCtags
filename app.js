@@ -700,8 +700,9 @@ const app = {
       this.updateSpectrumFromHSV();
     };
 
-    // Mouse events for hue
+    // Mouse events for hue - only respond to clicks directly on the hue bar
     spectrumHue.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
       this.dragState.isHueDragging = true;
       updateHue(e);
     });
@@ -721,11 +722,13 @@ const app = {
 
     // Click on hue bar
     spectrumHue.addEventListener('click', (e) => {
+      e.stopPropagation();
       updateHue(e);
     });
 
     // Touch events for hue
     spectrumHue.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
       this.dragState.isHueDragging = true;
       updateHue(e.touches[0]);
     }, { passive: false });
@@ -759,6 +762,7 @@ const app = {
 
     // Mouse events for S/V
     spectrumSV.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
       this.dragState.isSVDragging = true;
       updateSV(e);
     });
@@ -778,11 +782,13 @@ const app = {
 
     // Click on S/V area
     spectrumSV.addEventListener('click', (e) => {
+      e.stopPropagation();
       updateSV(e);
     });
 
     // Touch events for S/V
     spectrumSV.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
       this.dragState.isSVDragging = true;
       updateSV(e.touches[0]);
     }, { passive: false });
