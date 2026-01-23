@@ -362,14 +362,6 @@
             margin-bottom: 1.5rem;
         }
 
-        .spectrum-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            display: block;
-            font-weight: 500;
-        }
-
         .spectrum-hue {
             width: 100%;
             height: 30px;
@@ -378,7 +370,6 @@
             border-radius: 4px;
             cursor: crosshair;
             position: relative;
-            margin-bottom: 1rem;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
@@ -398,7 +389,7 @@
 
         .spectrum-sv {
             width: 100%;
-            height: 200px;
+            height: 100%;
             background: linear-gradient(135deg,
                     white 0%,
                     var(--spectrum-hue-color, #ff0000) 50%,
@@ -406,7 +397,6 @@
             border-radius: 4px;
             cursor: crosshair;
             position: relative;
-            margin-bottom: 1rem;
             border: 1px solid var(--border);
             touch-action: none;
             user-select: none;
@@ -423,6 +413,26 @@
             pointer-events: none;
             transform: translate(-6px, -6px);
             box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .spectrum-wrapper {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: stretch;
+        }
+
+        .spectrum-hue-container {
+            width: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .spectrum-sv-container {
+            flex: 1;
+            position: relative;
+            aspect-ratio: 1;
+            min-width: 150px;
         }
 
         .spectrum-sliders {
@@ -443,6 +453,7 @@
             font-size: 0.9rem;
             font-weight: 500;
             color: var(--text-secondary);
+            margin-bottom: 0;
         }
 
         .slider-group input[type="range"] {
@@ -489,6 +500,7 @@
             border: 1px solid var(--border);
             border-radius: 3px;
             color: var(--text-primary);
+            margin: 0;
         }
 
         .spectrum-preview {
@@ -587,12 +599,20 @@
 
             .spectrum-hue {
                 height: 24px;
-                margin-bottom: 0.8rem;
             }
 
-            .spectrum-sv {
-                height: 120px;
-                margin-bottom: 0.8rem;
+            .spectrum-wrapper {
+                gap: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .spectrum-hue-container {
+                width: 30px;
+            }
+
+            .spectrum-sv-container {
+                aspect-ratio: 1;
+                min-width: 100px;
             }
 
             .spectrum-sliders {
@@ -653,12 +673,19 @@
 
             .spectrum-hue {
                 height: 20px;
-                margin-bottom: 0.6rem;
             }
 
-            .spectrum-sv {
-                height: 100px;
-                margin-bottom: 0.6rem;
+            .spectrum-wrapper {
+                gap: 0.5rem;
+            }
+
+            .spectrum-hue-container {
+                width: 25px;
+            }
+
+            .spectrum-sv-container {
+                aspect-ratio: 1;
+                min-width: 80px;
             }
 
             .spectrum-sliders {
@@ -847,25 +874,25 @@
                             <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color
                             </h3>
 
-                            <!-- HUE Slider -->
-                            <div class="spectrum-container">
-                                <label class="spectrum-label">Hue</label>
-                                <div class="spectrum-hue" id="spectrumHue">
-                                    <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
+                            <!-- Combined Hue + Saturation/Brightness Picker -->
+                            <div class="spectrum-wrapper">
+                                <!-- Hue Slider (vertical) -->
+                                <div class="spectrum-hue-container">
+                                    <div class="spectrum-hue" id="spectrumHue">
+                                        <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Saturation & Value Picker -->
-                            <div class="spectrum-container">
-                                <label class="spectrum-label">Brightness & Saturation</label>
-                                <div class="spectrum-sv" id="spectrumSV">
-                                    <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                                <!-- Saturation & Brightness Picker (square) -->
+                                <div class="spectrum-sv-container">
+                                    <div class="spectrum-sv" id="spectrumSV">
+                                        <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- RGB Sliders -->
                             <div class="spectrum-sliders">
-                                <label class="spectrum-label">RGB</label>
                                 <div class="slider-group">
                                     <label>R:</label>
                                     <input type="range" id="spectrumR" min="0" max="255" value="255">
