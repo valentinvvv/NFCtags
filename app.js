@@ -291,7 +291,7 @@ const app = {
             }
       },
 
-      downloadJsonFile() {
+      downloadForNFC() {
             const formData = this.getFormData();
             const result = filamentGenerator.generateFromFormData(formData);
             const jsonData = result.json;
@@ -302,7 +302,7 @@ const app = {
                   .replace(/[^a-zA-Z0-9_]/g, '')
                   .toLowerCase();
             
-            filamentGenerator.downloadJsonFile(jsonData, filename);
+            filamentGenerator.downloadJsonFile(jsonData, `${filename}.json`);
             this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
       },
 
@@ -315,6 +315,21 @@ const app = {
           }).catch(() => {
             this.showStatus('writeStatus', 'error', 'Failed to copy JSON');
           });
+      },
+      
+      downloadJsonFile() {
+          const formData = this.getFormData();
+          const result = filamentGenerator.generateFromFormData(formData);
+          const jsonData = result.json;
+          
+          const filamentName = jsonData.filament_settings_id[0];
+          const filename = `${filamentName}`
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '')
+            .toLowerCase();
+          
+          filamentGenerator.downloadJsonFile(jsonData, `${filename}.json`);
+          this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
       },
       
       // ========================================================================
