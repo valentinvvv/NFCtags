@@ -179,7 +179,7 @@ const filamentGenerator = {
     const avgBed = Math.round((minBed + maxBed) / 2);
 
     // Build filament name
-    const filamentName = `${brand} ${material} ${cleanType}`;
+    const filamentName = `${brand} ${material} ${type}`;
 
     // Get validated inherits value using Material AND Type
     const inheritData = this.getValidInherits(material, type);
