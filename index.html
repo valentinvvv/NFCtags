@@ -147,6 +147,29 @@
             border-color: var(--accent);
         }
 
+        /* Select element styling with caret */
+        select {
+            background-image: var(--select-caret-light);
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px;
+            padding-right: 2.5rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            select {
+                background-image: var(--select-caret-dark);
+            }
+        }
+
+        [data-color-scheme="dark"] select {
+            background-image: var(--select-caret-dark);
+        }
+
+        [data-color-scheme="light"] select {
+            background-image: var(--select-caret-light);
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -925,6 +948,11 @@
             select,
             textarea {
                 font-size: 16px;
+            }
+
+            /* Reduce select padding on mobile to prevent overflow */
+            select {
+                padding-right: 2rem;
             }
 
             .form-row,
