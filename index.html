@@ -14,10 +14,14 @@
             --text-secondary: #b0b0b0;
             --accent: #ff6b35;
             --accent-hover: #ff8555;
+            --accent-active: #e55a24;
             --border: #444;
             --success: #4caf50;
+            --success-hover: #45a049;
             --error: #f44336;
+            --error-hover: #da190b;
             --warning: #ff9800;
+            --warning-hover: #e68900;
         }
 
         * {
@@ -61,7 +65,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1000px;
             margin: 2rem auto;
             padding: 0 1rem;
         }
@@ -119,73 +123,130 @@
 
         .form-content {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 2rem;
             align-items: start;
         }
 
-        .form-content-left {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
+        /* ===== UNIFIED BUTTON STYLING ===== */
         button {
-            width: 100%;
             padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 0.5rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         button:disabled {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
+        button:not(:disabled):active {
+            transform: translateY(1px);
+        }
+
+        /* Primary Button Style */
         .btn-primary {
             background: var(--accent);
             color: white;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+            border: 2px solid var(--accent);
         }
 
         .btn-primary:hover:not(:disabled) {
             background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
         }
 
+        .btn-primary:active:not(:disabled) {
+            background: var(--accent-active);
+            border-color: var(--accent-active);
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Secondary Button Style (Now Unified) */
         .btn-secondary {
             background: var(--bg-tertiary);
             color: var(--text-primary);
+            border: 2px solid var(--accent);
+            box-shadow: none;
         }
 
-        .btn-secondary:hover {
-            background: #4d4d4d;
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
+        .btn-secondary:active:not(:disabled) {
+            background: var(--accent-active);
+            border-color: var(--accent-active);
+        }
+
+        /* Success Button Style */
         .btn-success {
             background: var(--success);
             color: white;
+            border: 2px solid var(--success);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
         .btn-success:hover:not(:disabled) {
-            background: #45a049;
+            background: var(--success-hover);
+            border-color: var(--success-hover);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
         }
 
-        .btn-small-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        .btn-success:active:not(:disabled) {
+            background: #3d8b40;
+            border-color: #3d8b40;
+        }
+
+        /* Warning/Danger Button Style */
+        .btn-warning {
+            background: var(--error);
+            color: white;
+            border: 2px solid var(--error);
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: var(--error-hover);
+            border-color: var(--error-hover);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-warning:active:not(:disabled) {
+            background: #c41c3b;
+            border-color: #c41c3b;
+        }
+
+        /* Small Buttons (for compact areas like JSON preview) */
+        .btn-small {
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
-            border: 1px solid var(--border);
-            margin: 0.25rem;
+            border-radius: 4px;
         }
 
-        .btn-small-secondary:hover {
-            background: #4d4d4d;
+        .btn-small.btn-secondary {
+            border: 1px solid var(--border);
+        }
+
+        .btn-small.btn-secondary:hover:not(:disabled) {
+            border-color: var(--accent);
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.2);
         }
 
         .button-group {
@@ -195,15 +256,8 @@
             margin-top: 1rem;
         }
 
-        .button-group-full {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .button-group-full .full-width-btn {
-            grid-column: 1 / -1;
+        .button-group.full-width button {
+            width: 100%;
         }
 
         .button-row {
@@ -212,33 +266,73 @@
             flex-wrap: wrap;
         }
 
+        /* ===== NFC OPERATION FEEDBACK ===== */
         .nfc-status {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
+            gap: 0.75rem;
+            padding: 1rem;
             background: var(--bg-tertiary);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .nfc-status.ready {
+            border-color: var(--success);
+            background: rgba(76, 175, 80, 0.08);
+        }
+
+        .nfc-status.error {
+            border-color: var(--error);
+            background: rgba(244, 67, 54, 0.08);
         }
 
         .nfc-indicator {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: var(--error);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
         }
 
         .nfc-indicator.ready {
             background: var(--success);
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+            animation: pulse-success 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-success {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .status-message {
             padding: 1rem;
-            border-radius: 4px;
+            border-radius: 6px;
             margin-top: 1rem;
             display: none;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .status-message.show {
@@ -246,21 +340,61 @@
         }
 
         .status-message.success {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid var(--success);
+            background: rgba(76, 175, 80, 0.15);
+            border-color: var(--success);
             color: var(--success);
         }
 
         .status-message.error {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid var(--error);
+            background: rgba(244, 67, 54, 0.15);
+            border-color: var(--error);
             color: var(--error);
         }
 
         .status-message.warning {
-            background: rgba(255, 152, 0, 0.2);
-            border: 1px solid var(--warning);
+            background: rgba(255, 152, 0, 0.15);
+            border-color: var(--warning);
             color: var(--warning);
+        }
+
+        /* Progress indicator for NFC operations */
+        .operation-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(255, 107, 53, 0.1);
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            animation: highlightFlash 0.6s ease;
+        }
+
+        @keyframes highlightFlash {
+            0% { background: rgba(255, 107, 53, 0.3); }
+            100% { background: rgba(255, 107, 53, 0.1); }
+        }
+
+        .operation-indicator.show {
+            display: flex;
+        }
+
+        .operation-indicator.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 107, 53, 0.3);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .info-box {
@@ -312,21 +446,20 @@
 
         .json-preview-section {
             background: var(--bg-tertiary);
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            height: fit-content;
-            position: sticky;
-            top: 2rem;
         }
 
         .json-preview-label {
             font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .json-preview {
@@ -337,9 +470,9 @@
             font-size: 0.75rem;
             white-space: pre-wrap;
             word-break: break-all;
-            max-height: 600px;
+            max-height: 400px;
             overflow-y: auto;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             border: 1px solid var(--border);
             color: #4caf50;
         }
@@ -364,20 +497,21 @@
 
         .validation-alert {
             padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-radius: 6px;
             font-size: 0.9rem;
             border-left: 4px solid;
+            animation: slideIn 0.3s ease;
         }
 
         .validation-alert.valid {
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(76, 175, 80, 0.15);
             border-color: var(--success);
             color: var(--success);
         }
 
         .validation-alert.warning {
-            background: rgba(255, 152, 0, 0.1);
+            background: rgba(255, 152, 0, 0.15);
             border-color: var(--warning);
             color: var(--warning);
         }
@@ -619,33 +753,7 @@
 
         .spectrum-buttons button {
             flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
             touch-action: none;
-        }
-
-        .spectrum-buttons .btn-ok {
-            background: var(--accent);
-            color: white;
-        }
-
-        .spectrum-buttons .btn-ok:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-        }
-
-        .spectrum-buttons .btn-cancel {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .spectrum-buttons .btn-cancel:hover {
-            background: var(--border);
         }
 
         /* Camera Picker Modal */
@@ -745,55 +853,9 @@
 
         .camera-buttons button {
             flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .camera-buttons .btn-use {
-            background: var(--accent);
-            color: white;
-        }
-
-        .camera-buttons .btn-use:hover {
-            background: var(--accent-hover);
-        }
-
-        .camera-buttons .btn-close {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .camera-buttons .btn-close:hover {
-            background: var(--border);
-        }
-
-        /* Desktop: JSON on right side, sticky */
-        @media (min-width: 1024px) {
-            .json-preview-section {
-                position: sticky;
-                top: 2rem;
-                max-height: calc(100vh - 4rem);
-            }
-        }
-
-        /* Tablet and below: JSON below form */
-        @media (max-width: 1023px) {
-            .form-content {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .json-preview-section {
-                position: static;
-                max-height: none;
-            }
-        }
-
+        /* Desktop and Tablet */
         @media (max-width: 900px) {
             .form-content {
                 grid-template-columns: 1fr;
@@ -826,23 +888,13 @@
                 grid-template-columns: 1fr;
             }
 
-            .button-group-full {
-                grid-template-columns: 1fr;
-            }
-
-            .button-group-full .full-width-btn {
-                grid-column: auto;
+            button {
+                padding: 0.65rem 1rem;
+                font-size: 0.95rem;
             }
 
             .color-palette {
                 grid-template-columns: repeat(6, 1fr);
-            }
-
-            .json-preview-section {
-                position: static;
-                margin-top: 2rem;
-                border-top: 2px solid var(--border);
-                padding-top: 1.5rem;
             }
 
             .color-spectrum-picker {
@@ -905,15 +957,6 @@
                 font-size: 0.9rem;
             }
 
-            .spectrum-buttons {
-                gap: 0.75rem;
-            }
-
-            .spectrum-buttons button {
-                padding: 0.6rem;
-                font-size: 0.9rem;
-            }
-
             .camera-container {
                 width: 95vw;
                 max-width: 95vw;
@@ -925,7 +968,6 @@
             }
         }
 
-        /* Mobile */
         @media (max-width: 480px) {
             .color-spectrum-picker {
                 padding: 0.75rem;
@@ -980,11 +1022,11 @@
         <!-- Mode Selection -->
         <div id="modeSelection" class="section">
             <h2 class="section-title">What would you like to do?</h2>
-            <div class="button-group" style="margin-top: 2rem;">
-                <button class="btn-success" onclick="app.setMode('read')" style="padding: 2rem;">
+            <div class="button-group" style="margin-top: 2rem; gap: 1.5rem;">
+                <button class="btn-success" onclick="app.setMode('read')" style="padding: 1.5rem; font-size: 1.1rem;">
                     📖 Read / Update Tag
                 </button>
-                <button class="btn-success" onclick="app.setMode('create')" style="padding: 2rem;">
+                <button class="btn-success" onclick="app.setMode('create')" style="padding: 1.5rem; font-size: 1.1rem;">
                     ✏️ Create New Tag
                 </button>
             </div>
@@ -994,12 +1036,12 @@
         <div id="readSection" class="section hidden">
             <h2 class="section-title">📖 Read NFC Tag or Upload File</h2>
 
-            <div class="nfc-status">
+            <div class="nfc-status" id="nfcStatus">
                 <div class="nfc-indicator" id="nfcIndicator"></div>
                 <span id="nfcStatusText">Checking NFC...</span>
             </div>
 
-            <button id="scanBtn" class="btn-success" onclick="app.toggleScan()">Start Scanning</button>
+            <button id="scanBtn" class="btn-primary" onclick="app.toggleScan()" style="width: 100%;">▶️ Start Scanning</button>
 
             <div class="status-message" id="readStatus"></div>
 
@@ -1016,16 +1058,18 @@
                 <div class="decoded-data" id="decodedData"></div>
             </div>
 
-            <button class="btn-secondary" onclick="app.setMode('menu')" style="margin-top: 1rem;">← Back to Menu</button>
+            <button class="btn-secondary" onclick="app.setMode('menu')" style="margin-top: 1rem; width: 100%;">
+                ← Back to Menu
+            </button>
         </div>
 
         <!-- Form Section -->
         <div id="formSection" class="section hidden">
             <h2 class="section-title">✏️ <span id="formTitle">Create New Tag</span></h2>
             
-            <div class="form-content">
-                <!-- Left Side: Form Controls -->
-                <div class="form-content-left">
+            <div class="form-content" style="display: flex; flex-direction: column;">
+                <!-- Left Side: Form Controls + Buttons -->
+                <div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="materialTypeInput">Material Type</label>
@@ -1180,8 +1224,8 @@
 
                                     <!-- Buttons -->
                                     <div class="spectrum-buttons">
-                                        <button class="btn-ok" onclick="app.confirmColorPicker()">✓ OK</button>
-                                        <button class="btn-cancel" onclick="app.closeColorPicker()">✕ Cancel</button>
+                                        <button class="btn-success" onclick="app.confirmColorPicker()">✓ OK</button>
+                                        <button class="btn-secondary" onclick="app.closeColorPicker()">✕ Cancel</button>
                                     </div>
                                 </div>
                             </div>
@@ -1206,8 +1250,8 @@
                                     </div>
 
                                     <div class="camera-buttons">
-                                        <button class="btn-use" onclick="app.useCameraColor()">✓ Use Color</button>
-                                        <button class="btn-close" onclick="app.closeCameraPicker()">✕ Close</button>
+                                        <button class="btn-success" onclick="app.useCameraColor()">✓ Use Color</button>
+                                        <button class="btn-secondary" onclick="app.closeCameraPicker()">✕ Close</button>
                                     </div>
                                 </div>
                             </div>
@@ -1270,39 +1314,46 @@
                     </div>
 
                     <div class="info-box" id="recordSizeInfo"
-                        style="margin-top: 1rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success);">
+                        style="margin-top: 1rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success); border: 1px solid;">
                         📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>
                     </div>
 
+                    <!-- Operation Indicator (Hidden by default) -->
+                    <div id="operationIndicator" class="operation-indicator hidden">
+                        <div class="spinner"></div>
+                        <span id="operationText">Processing...</span>
+                    </div>
+
                     <div class="status-message" id="writeStatus"></div>
-                    
-                    <!-- Button Layout: Write + Download (2 cols), Back to Menu (full width) -->
-                    <div class="button-group-full" style="margin-top: 1.5rem;">
-                        <button class="btn-secondary" onclick="app.toggleWrite()">📝 Write to NFC</button>
-                        <button class="btn-secondary" onclick="app.downloadFile()">💾 Download for NFC</button>
-                        <button class="full-width-btn btn-secondary" onclick="app.setMode('menu')" style="grid-column: 1 / -1;">← Back to Menu</button>
+
+                    <!-- NFC Buttons Section - Enhanced Styling -->
+                    <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <button class="btn-primary" id="writeNfcBtn" onclick="app.toggleWrite()" style="font-size: 1rem; padding: 1rem;">
+                            📝 Write to NFC
+                        </button>
+                        <button class="btn-secondary" id="downloadNfcBtn" onclick="app.downloadForNFC()" style="font-size: 1rem; padding: 1rem;">
+                            💾 Download for NFC
+                        </button>
                     </div>
                 </div>
 
-                <!-- Right Side: JSON Preview (sticky on desktop, bottom on mobile) -->
-                <div class="json-preview-section">
+                <!-- Right Side: JSON Preview (goes below on mobile) -->
+                <div class="json-preview-section" style="margin-top: 0;">
                     <div class="json-preview-label">📋 JSON Preview (OpenSpool Format)</div>
-                    <div class="json-preview" id="jsonPreview">{
-  "filament_settings_id": ["Generic PETG"],
-  "filament_vendor": ["Generic"],
-  "from": "User",
-  "inherits": "Generic PETG",
-  "is_custom_defined": "0",
-  "name": "Generic PETG",
-  "nozzle_temperature": ["235"],
-  "nozzle_temperature_initial_layer": ["230"],
-  "textured_plate_temp": ["75"],
-  "textured_plate_temp_initial_layer": ["74"],
-  "version": "2.2.42.2"
-}</div>
-                    <button class="copy-button" onclick="app.copyJsonToClipboard()">📋 Copy JSON</button>
-                    <button class="btn-primary" onclick="app.downloadJsonFile()" style="padding: 0.5rem; margin-bottom: 1rem;">💾 Download JSON</button>
+                    <div id="validationAlert" class="hidden"></div>
+                    <div class="json-preview" id="jsonPreview">{}
+                    </div>
+                    <div class="button-row">
+                        <button class="btn-secondary btn-small" onclick="app.copyJsonToClipboard()">📋 Copy</button>
+                        <button class="btn-secondary btn-small" onclick="app.downloadJsonFile()">⬇️ Download</button>
+                    </div>
                 </div>
+            </div>
+
+            <div class="button-group" style="margin-top: 1rem; gap: 1rem;">
+                <button class="btn-secondary" onclick="app.setMode('menu')" style="padding: 0.75rem 1.5rem;">
+                    ← Back to Menu
+                </button>
             </div>
         </div>
     </div>
