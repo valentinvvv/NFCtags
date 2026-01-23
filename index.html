@@ -98,8 +98,10 @@
             font-weight: 500;
         }
 
+        /* Mobile-consistent form controls */
         input,
-        select {
+        select,
+        textarea {
             width: 100%;
             padding: 0.75rem;
             background: var(--bg-tertiary);
@@ -107,6 +109,34 @@
             border-radius: 4px;
             color: var(--text-primary);
             font-size: 1rem;
+            
+            /* New styles */
+            -webkit-appearance: none;
+            appearance: none;
+            line-height: 1.2;
+            min-height: 44px;
+        }
+
+        /* Fix Chrome/Safari autofill forcing light backgrounds */
+        input:-webkit-autofill,
+        select:-webkit-autofill,
+        textarea:-webkit-autofill {
+            -webkit-text-fill-color: var(--text-primary);
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-tertiary) inset;
+            box-shadow: 0 0 0 1000px var(--bg-tertiary) inset;
+            transition: background-color 5000s ease-in-out 0s; /* Hack to keep background dark */
+        }
+
+        /* Remove number spinners */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
         }
 
         input:focus,
@@ -886,6 +916,13 @@
 
             .section {
                 padding: 1rem;
+            }
+            
+            /* Add Mobile Font Size Fix */
+            input,
+            select,
+            textarea {
+                font-size: 16px;
             }
 
             .form-row,
