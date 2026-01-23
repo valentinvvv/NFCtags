@@ -98,7 +98,6 @@ const nfcWriter = {
 const app = {
       nfcSupported: false,
       cameraCaptureColor: null,
-      selectedFilament: null,
       cameraStream: null,
       colorSamplingInterval: null,
 
@@ -292,26 +291,19 @@ const app = {
             }
       },
 
-      downloadForNFC() {
+      downloadJsonFile() {
             const formData = this.getFormData();
             const result = filamentGenerator.generateFromFormData(formData);
             const jsonData = result.json;
-
+            
             const filamentName = jsonData.filament_settings_id[0];
             const filename = `${filamentName}`
                   .replace(/\s+/g, '_')
                   .replace(/[^a-zA-Z0-9_]/g, '')
                   .toLowerCase();
-
-            filamentGenerator.downloadJsonFile(jsonData, `${filename}.json`);
+            
+            filamentGenerator.downloadJsonFile(jsonData, filename);
             this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
-      },
-
-      downloadNFCJSON() {
-            const formData = this.getFormData();
-            const data = OpenSpool.generateData(formData);
-            OpenSpool.downloadNFCJSON(data);
-            this.showStatus('writeStatus', 'success', 'NFC data downloaded');
       },
 
       copyJsonToClipboard() {
@@ -323,21 +315,6 @@ const app = {
           }).catch(() => {
             this.showStatus('writeStatus', 'error', 'Failed to copy JSON');
           });
-      },
-      
-      downloadJsonFile() {
-          const formData = this.getFormData();
-          const result = filamentGenerator.generateFromFormData(formData);
-          const jsonData = result.json;
-          
-          const filamentName = jsonData.filament_settings_id[0];
-          const filename = `${filamentName}`
-            .replace(/\s+/g, '_')
-            .replace(/[^a-zA-Z0-9_]/g, '')
-            .toLowerCase();
-          
-          filamentGenerator.downloadJsonFile(jsonData, filename);
-          this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
       },
       
       // ========================================================================
@@ -467,9 +444,8 @@ const app = {
             if (!file) return;
 
             nfcReader.stop();
-            const format = formats.detectFormatFromFilename(file.name);
 
-            if (!format) {
+            if (!file.name.endsWith('.json')) {
                   this.showStatus('readStatus', 'error', 'Unsupported file type');
                   return;
             }
@@ -1190,49 +1166,6 @@ const app = {
 
             if (type === 'success') {
                   setTimeout(() => element.classList.remove('show'), 5000);
-            }
-      }
-};
-
-const formats = {
-
-      detectFormatFromFilename(filename) {
-            if (filename.endsWith('.json')) {
-                  return 'openspool';
-            }
-            return null;
-      },
-
-      calculateRecordSize(formData) {
-            try {
-                  const data = OpenSpool.generateData(formData);
-                  const records = OpenSpool.createNDEFRecord(data);
-
-                  let totalSize = 0;
-                  for (const record of records) {
-                        // NDEF record header overhead
-                        // 1 byte: flags
-                        // 1 byte: type length
-                        // 1-4 bytes: payload length (depends on size)
-                        // No ID field for our records
-                        const mediaType = record.mediaType;
-                        const payloadSize = record.data.byteLength || record.data.length;
-
-                        let headerSize = 2; // flags + type length
-                        if (payloadSize < 256) {
-                              headerSize += 1; // short record (1 byte payload length)
-                        } else {
-                              headerSize += 4; // long record (4 byte payload length)
-                        }
-
-                        const typeLength = mediaType.length;
-                        const recordSize = headerSize + typeLength + payloadSize;
-                        totalSize += recordSize;
-                  }
-
-                  return totalSize;
-            } catch (e) {
-                  return 0;
             }
       }
 };
