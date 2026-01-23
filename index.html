@@ -372,6 +372,7 @@
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
+            border: none;
         }
 
         .spectrum-hue-slider {
@@ -700,7 +701,7 @@
     <header>
         <h1>🧵 Filament Tag Generator</h1>
         <p>
-            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a> &
+            <a href="https://openspool.io/rfic.html" target="_blank">OpenSpool</a> &
             <a href="https://specs.openprinttag.org/" target="_blank">OpenPrintTag</a> formats
         </p>
     </header>
@@ -756,4 +757,242 @@
                     <label for="materialTypeInput">Material Type</label>
                     <input type="text" id="materialTypeInput" list="materialList" placeholder="Select or type material"
                         class="full-width" onchange="app.applyTemperaturePreset()">
-                    <datalist id="materialList">\n                        <option value="PLA">\n                        <option value="PETG">\n                        <option value="ABS">\n                        <option value="ASA">\n                        <option value="BVOH">\n                        <option value="easyPETG">\n                        <option value="ecoPLA">\n                        <option value="HIPS">\n                        <option value="PA">\n                        <option value="PA6">\n                        <option value="PA12">\n                        <option value="PC">\n                        <option value="PEBA">\n                        <option value="PEI">\n                        <option value="PEEK">\n                        <option value="PP">\n                        <option value="PCTG">\n                        <option value="PVA">\n                        <option value="TPE">\n                        <option value="TPU">\n                            <!-- CF Variants -->\n                        <option value="ABS-CF">\n                        <option value="ASA-CF">\n                        <option value="easyPETG-CF">\n                        <option value="ecoPLA-CF">\n                        <option value="ePAHT-CF">\n                        <option value="HIPS-CF">\n                        <option value="PA-CF">\n                        <option value="PA6-CF">\n                        <option value="PA12-CF">\n                        <option value="PEBA-CF">\n                        <option value="PEI-CF">\n                        <option value="PEEK-CF">\n                        <option value="PETG-CF">\n                        <option value="PC-CF">\n                        <option value="PP-CF">\n                        <option value="PCTG-CF">\n                        <option value="TPE-CF">\n                        <option value="TPU-CF">\n                            <!-- GF Variants -->\n                        <option value="ABS-GF">\n                        <option value="ASA-GF">\n                        <option value="easyPETG-GF">\n                        <option value="ecoPLA-GF">\n                        <option value="PA-GF">\n                        <option value="PA6-GF">\n                        <option value="PA12-GF">\n                        <option value="PEBA-GF">\n                        <option value="PEI-GF">\n                        <option value="PEEK-GF">\n                        <option value="PETG-GF">\n                        <option value="PC-GF">\n                        <option value="PP-GF">\n                        <option value="PCTG-GF">\n                        <option value="TPE-GF">\n                        <option value="TPU-GF">\n                            <!-- Special -->\n                        <option value="Carbon-Graphene">\n                        <option value="Metal-Brass">\n                        <option value="Metal-Bronze">\n                        <option value="Metal-Copper">\n                        <option value="Nylon-Hydrophobic-CF">\n                        <option value="Stone">\n                        <option value="Wood">\n                    </datalist>\n                </div>\n                <div class="form-group">\n                    <label for="subTypeInput">Type</label>\n                    <input type="text" id="subTypeInput" list="subTypeList" placeholder="Select or type subtype"\n                        class="full-width">\n                    <datalist id="subTypeList">\n                        <option value="Basic">\n                        <option value="Glitter">\n                        <option value="Matte Finish">\n                        <option value="Translucent">\n                        <option value="Transparent">\n                        <option value="Rainbow">\n                        <option value="Silk Finish">\n                    </datalist>\n                </div>\n            </div>\n\n            <div class="form-group">\n                <label>Color 1 (Primary)</label>\n                <div class="color-palette" id="colorPalette"></div>\n                <div style="display: flex; align-items: center; gap: 0.75rem;\">\n                    <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}">\n\n                    <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 60px; height: 40px; border-radius: 4px;\n                                border: 2px solid var(--border); background: #FFFFFF;\n                                cursor: pointer; touch-action: manipulation;\">\n                    </div>\n\n                    <!-- Color Spectrum Picker Modal -->\n                    <div id="colorSpectrumModal" class="color-spectrum-modal hidden"\n                        onclick="if(event.target === this) app.closeColorPicker()">\n                        <div class="color-spectrum-picker">\n                            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color\n                            </h3>\n\n                            <!-- Saturation & Brightness Picker (square) -->\n                            <div class=\"spectrum-wrapper\">\n                                <div class=\"spectrum-sv-container\">\n                                    <div class=\"spectrum-sv\" id=\"spectrumSV\">\n                                        <div class=\"spectrum-sv-pointer\" id=\"spectrumSVPointer\"></div>\n                                    </div>\n                                </div>\n\n                                <!-- Hue Bar (horizontal, below) -->\n                                <div class=\"spectrum-hue\">\n                                    <div class=\"spectrum-hue-slider\" id=\"spectrumHueSlider\"></div>\n                                </div>\n                            </div>\n\n                            <!-- RGB Sliders -->\n                            <div class=\"spectrum-sliders\">\n                                <div class=\"slider-group\">\n                                    <label>R:</label>\n                                    <input type=\"range\" id=\"spectrumR\" min=\"0\" max=\"255\" value=\"255\">\n                                    <input type=\"text\" id=\"spectrumRText\" maxlength=\"3\" value=\"255\">\n                                </div>\n                                <div class=\"slider-group\">\n                                    <label>G:</label>\n                                    <input type=\"range\" id=\"spectrumG\" min=\"0\" max=\"255\" value=\"255\">\n                                    <input type=\"text\" id=\"spectrumGText\" maxlength=\"3\" value=\"255\">\n                                </div>\n                                <div class=\"slider-group\">\n                                    <label>B:</label>\n                                    <input type=\"range\" id=\"spectrumB\" min=\"0\" max=\"255\" value=\"255\">\n                                    <input type=\"text\" id=\"spectrumBText\" maxlength=\"3\" value=\"255\">\n                                </div>\n                            </div>\n\n                            <!-- Preview -->\n                            <div class=\"spectrum-preview\">\n                                <div class=\"spectrum-preview-box\" id=\"spectrumPreviewBox\"></div>\n                                <div class=\"spectrum-preview-text\">\n                                    <div>HEX: <strong id=\"spectrumHexDisplay\">#FFFFFF</strong></div>\n                                    <div>RGB: <strong id=\"spectrumRgbDisplay\">rgb(255, 255, 255)</strong></div>\n                                </div>\n                            </div>\n\n                            <!-- Buttons -->\n                            <div class=\"spectrum-buttons\">\n                                <button class=\"btn-ok\" onclick=\"app.confirmColorPicker()\">✓ OK</button>\n                                <button class=\"btn-cancel\" onclick=\"app.closeColorPicker()\">✕ Cancel</button>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n                <small style=\"color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;\">\n                    Enter hex color (e.g., FF5733, #FF5733)\n                </small>\n            </div>\n\n            <div class=\"form-group\">\n                <label for="brandInput">Brand Name</label>\n                <input type="text" id="brandInput" list="brandList" placeholder="Select or type a brand"\n                    class="full-width">\n                <datalist id="brandList">\n                    <option value="Generic">\n                    <option value="Bambu Lab">\n                    <option value="eSun">\n                    <option value="Polymaker">\n                    <option value="Hatchbox">\n                    <option value="Overture">\n                    <option value="SUNLU">\n                    <option value="Prusament">\n                    <option value="Jayo">\n                        <!-- The specific brands you requested -->\n                    <option value="3DJake">\n                    <option value="Anycubic">\n                    <option value="AzureFilm">\n                    <option value="ColorFabb">\n                    <option value="Elegoo">\n                    <option value="Extrudr">\n                    <option value="Fiberlogy">\n                    <option value="Fillamentum">\n                    <option value="FormFutura">\n                    <option value="Geeetech">\n                    <option value="Kimya">\n                    <option value="Spectrum">\n                </datalist>\n            </div>\n\n            <div class="form-row">\n                <div class="form-group">\n                    <label>Min Nozzle Temp (°C)</label>\n                    <input type="number" id="minTemp" placeholder="220" value="220">\n                </div>\n                <div class="form-group">\n                    <label>Max Nozzle Temp (°C)</label>\n                    <input type="number" id="maxTemp" placeholder="240" value="240">\n                </div>\n            </div>\n\n            <div class="form-row">\n                <div class="form-group">\n                    <label>Min Bed Temp (°C)</label>\n                    <input type="number" id="bedTempMin" placeholder="50">\n                </div>\n                <div class="form-group">\n                    <label>Max Bed Temp (°C)</label>\n                    <input type="number" id="bedTempMax" placeholder="60">\n                </div>\n            </div>\n\n            <div class="button-group">\n                <button class="btn-secondary" onclick="app.downloadFile()">💾 Download File</button>\n                <button id="writeBtn" class="btn-success" onclick="app.toggleWrite()">📝 Write to NFC</button>\n            </div>\n\n            <div class="info-box" id="recordSizeInfo"\n                style="margin-top: 0.5rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success);">\n                📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>\n            </div>\n\n            <div class="status-message" id="writeStatus"></div>\n\n            <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>\n        </div>\n    </div>\n\n    <footer>\n        <p>\n            Filament Tag Generator - Supporting\n            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a> &\n        </p>\n        <p style="margin-top: 0.5rem; font-size: 0.85rem;">\n            © 2025 <a href="https://github.com/paxx12/" target="_blank">paxx12</a> - Open Source Project\n        </p>\n    </footer>\n\n    <script src="openspool.js"></script>\n    <script src="app.js"></script>\n</body>\n\n</html>
+                    <datalist id="materialList">
+                        <option value="PLA">
+                        <option value="PETG">
+                        <option value="ABS">
+                        <option value="ASA">
+                        <option value="BVOH">
+                        <option value="easyPETG">
+                        <option value="ecoPLA">
+                        <option value="HIPS">
+                        <option value="PA">
+                        <option value="PA6">
+                        <option value="PA12">
+                        <option value="PC">
+                        <option value="PEBA">
+                        <option value="PEI">
+                        <option value="PEEK">
+                        <option value="PP">
+                        <option value="PCTG">
+                        <option value="PVA">
+                        <option value="TPE">
+                        <option value="TPU">
+                        <!-- CF Variants -->
+                        <option value="ABS-CF">
+                        <option value="ASA-CF">
+                        <option value="easyPETG-CF">
+                        <option value="ecoPLA-CF">
+                        <option value="ePAHT-CF">
+                        <option value="HIPS-CF">
+                        <option value="PA-CF">
+                        <option value="PA6-CF">
+                        <option value="PA12-CF">
+                        <option value="PEBA-CF">
+                        <option value="PEI-CF">
+                        <option value="PEEK-CF">
+                        <option value="PETG-CF">
+                        <option value="PC-CF">
+                        <option value="PP-CF">
+                        <option value="PCTG-CF">
+                        <option value="TPE-CF">
+                        <option value="TPU-CF">
+                        <!-- GF Variants -->
+                        <option value="ABS-GF">
+                        <option value="ASA-GF">
+                        <option value="easyPETG-GF">
+                        <option value="ecoPLA-GF">
+                        <option value="PA-GF">
+                        <option value="PA6-GF">
+                        <option value="PA12-GF">
+                        <option value="PEBA-GF">
+                        <option value="PEI-GF">
+                        <option value="PEEK-GF">
+                        <option value="PETG-GF">
+                        <option value="PC-GF">
+                        <option value="PP-GF">
+                        <option value="PCTG-GF">
+                        <option value="TPE-GF">
+                        <option value="TPU-GF">
+                        <!-- Special -->
+                        <option value="Carbon-Graphene">
+                        <option value="Metal-Brass">
+                        <option value="Metal-Bronze">
+                        <option value="Metal-Copper">
+                        <option value="Nylon-Hydrophobic-CF">
+                        <option value="Stone">
+                        <option value="Wood">
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label for="subTypeInput">Type</label>
+                    <input type="text" id="subTypeInput" list="subTypeList" placeholder="Select or type subtype"
+                        class="full-width">
+                    <datalist id="subTypeList">
+                        <option value="Basic">
+                        <option value="Glitter">
+                        <option value="Matte Finish">
+                        <option value="Translucent">
+                        <option value="Transparent">
+                        <option value="Rainbow">
+                        <option value="Silk Finish">
+                    </datalist>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Color 1 (Primary)</label>
+                <div class="color-palette" id="colorPalette"></div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}">
+
+                    <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 60px; height: 40px; border-radius: 4px;
+                                border: 2px solid var(--border); background: #FFFFFF;
+                                cursor: pointer; touch-action: manipulation;">
+                    </div>
+
+                    <!-- Color Spectrum Picker Modal -->
+                    <div id="colorSpectrumModal" class="color-spectrum-modal hidden"
+                        onclick="if(event.target === this) app.closeColorPicker()">
+                        <div class="color-spectrum-picker">
+                            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color
+                            </h3>
+
+                            <!-- Saturation & Brightness Picker (square) -->
+                            <div class="spectrum-wrapper">
+                                <div class="spectrum-sv-container">
+                                    <div class="spectrum-sv" id="spectrumSV">
+                                        <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Hue Bar (horizontal, below) -->
+                                <div class="spectrum-hue" id="spectrumHue">
+                                    <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
+                                </div>
+                            </div>
+
+                            <!-- RGB Sliders -->
+                            <div class="spectrum-sliders">
+                                <div class="slider-group">
+                                    <label>R:</label>
+                                    <input type="range" id="spectrumR" min="0" max="255" value="255">
+                                    <input type="text" id="spectrumRText" maxlength="3" value="255">
+                                </div>
+                                <div class="slider-group">
+                                    <label>G:</label>
+                                    <input type="range" id="spectrumG" min="0" max="255" value="255">
+                                    <input type="text" id="spectrumGText" maxlength="3" value="255">
+                                </div>
+                                <div class="slider-group">
+                                    <label>B:</label>
+                                    <input type="range" id="spectrumB" min="0" max="255" value="255">
+                                    <input type="text" id="spectrumBText" maxlength="3" value="255">
+                                </div>
+                            </div>
+
+                            <!-- Preview -->
+                            <div class="spectrum-preview">
+                                <div class="spectrum-preview-box" id="spectrumPreviewBox"></div>
+                                <div class="spectrum-preview-text">
+                                    <div>HEX: <strong id="spectrumHexDisplay">#FFFFFF</strong></div>
+                                    <div>RGB: <strong id="spectrumRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="spectrum-buttons">
+                                <button class="btn-ok" onclick="app.confirmColorPicker()">✓ OK</button>
+                                <button class="btn-cancel" onclick="app.closeColorPicker()">✕ Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                    Enter hex color (e.g., FF5733, #FF5733)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="brandInput">Brand Name</label>
+                <input type="text" id="brandInput" list="brandList" placeholder="Select or type a brand"
+                    class="full-width">
+                <datalist id="brandList">
+                    <option value="Generic">
+                    <option value="Bambu Lab">
+                    <option value="eSun">
+                    <option value="Polymaker">
+                    <option value="Hatchbox">
+                    <option value="Overture">
+                    <option value="SUNLU">
+                    <option value="Prusament">
+                    <option value="Jayo">
+                    <!-- The specific brands you requested -->
+                    <option value="3DJake">
+                    <option value="Anycubic">
+                    <option value="AzureFilm">
+                    <option value="ColorFabb">
+                    <option value="Elegoo">
+                    <option value="Extrudr">
+                    <option value="Fiberlogy">
+                    <option value="Fillamentum">
+                    <option value="FormFutura">
+                    <option value="Geeetech">
+                    <option value="Kimya">
+                    <option value="Spectrum">
+                </datalist>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Nozzle Temp (°C)</label>
+                    <input type="number" id="minTemp" placeholder="220" value="220">
+                </div>
+                <div class="form-group">
+                    <label>Max Nozzle Temp (°C)</label>
+                    <input type="number" id="maxTemp" placeholder="240" value="240">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Bed Temp (°C)</label>
+                    <input type="number" id="bedTempMin" placeholder="50">
+                </div>
+                <div class="form-group">
+                    <label>Max Bed Temp (°C)</label>
+                    <input type="number" id="bedTempMax" placeholder="60">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" onclick="app.downloadFile()">💾 Download File</button>
+                <button id="writeBtn" class="btn-success" onclick="app.toggleWrite()">📝 Write to NFC</button>
+            </div>
+
+            <div class="info-box" id="recordSizeInfo"
+                style="margin-top: 0.5rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success);">
+                📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>
+            </div>
+
+            <div class="status-message" id="writeStatus"></div>
+
+            <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>
+            Filament Tag Generator - Supporting
+            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a> &
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            © 2025 <a href="https://github.com/paxx12/" target="_blank">paxx12</a> - Open Source Project
+        </p>
+    </footer>
+
+    <script src="openspool.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
