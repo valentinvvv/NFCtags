@@ -321,34 +321,16 @@
             text-decoration: underline;
         }
 
-        @media (max-width: 640px) {
-            .container {
-                margin: 1rem auto;
-            }
-
-            .section {
-                padding: 1rem;
-            }
-
-            .form-row,
-            .button-group {
-                grid-template-columns: 1fr;
-            }
-
-            .color-palette {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
-
         #spectrumHue,
-        #spectrumHueSlider {
+        #spectrumHueSlider,
+        #spectrumSV,
+        #spectrumSVPointer {
             touch-action: none;
         }
 
         /* Color Spectrum Picker */
         .color-spectrum-modal {
             display: none;
-            /* Скрыто по умолчанию */
             position: fixed;
             top: 0;
             left: 0;
@@ -358,6 +340,7 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 10px;
         }
 
         .color-spectrum-modal.show {
@@ -372,6 +355,7 @@
             max-width: 400px;
             width: 90%;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            touch-action: none;
         }
 
         .spectrum-container {
@@ -395,6 +379,9 @@
             cursor: crosshair;
             position: relative;
             margin-bottom: 1rem;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .spectrum-hue-slider {
@@ -421,6 +408,9 @@
             position: relative;
             margin-bottom: 1rem;
             border: 1px solid var(--border);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .spectrum-sv-pointer {
@@ -464,6 +454,7 @@
             -webkit-appearance: none;
             appearance: none;
             background: var(--bg-tertiary);
+            touch-action: none;
         }
 
         .slider-group input[type="range"]::-webkit-slider-thumb {
@@ -546,6 +537,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            touch-action: none;
         }
 
         .spectrum-buttons .btn-ok {
@@ -567,19 +559,127 @@
             background: var(--border);
         }
 
-        /* На мобильных устройствах */
+        /* Desktop and Tablet */
         @media (max-width: 640px) {
-            .color-picker-modal {
-                width: 95vw !important;
-                max-height: 95vh !important;
-                padding: 16px !important;
+            .container {
+                margin: 1rem auto;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+
+            .form-row,
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .color-palette {
+                grid-template-columns: repeat(6, 1fr);
+            }
+
+            .color-spectrum-picker {
+                width: 95vw;
+                max-width: 95vw;
+                padding: 1rem;
+                border-radius: 8px;
+            }
+
+            .spectrum-hue {
+                height: 24px;
+                margin-bottom: 0.8rem;
             }
 
             .spectrum-sv {
-                height: 150px;
+                height: 120px;
+                margin-bottom: 0.8rem;
+            }
+
+            .spectrum-sliders {
+                gap: 0.7rem;
+                margin-bottom: 1rem;
+            }
+
+            .slider-group {
+                gap: 0.5rem;
+            }
+
+            .slider-group label {
+                min-width: 25px;
+                font-size: 0.85rem;
+            }
+
+            .slider-group input[type="text"] {
+                width: 50px;
+                padding: 0.3rem;
+                font-size: 0.85rem;
+            }
+
+            .spectrum-preview {
+                gap: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .spectrum-preview-box {
+                width: 50px;
+                height: 50px;
+                flex-shrink: 0;
             }
 
             .spectrum-preview-text div {
+                margin-bottom: 0.3rem;
+                font-size: 0.8rem;
+            }
+
+            .spectrum-preview-text strong {
+                font-size: 0.9rem;
+            }
+
+            .spectrum-buttons {
+                gap: 0.75rem;
+            }
+
+            .spectrum-buttons button {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 480px) {
+            .color-spectrum-picker {
+                padding: 0.75rem;
+            }
+
+            .spectrum-hue {
+                height: 20px;
+                margin-bottom: 0.6rem;
+            }
+
+            .spectrum-sv {
+                height: 100px;
+                margin-bottom: 0.6rem;
+            }
+
+            .spectrum-sliders {
+                gap: 0.6rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .slider-group label {
+                font-size: 0.8rem;
+            }
+
+            .spectrum-preview-box {
+                width: 45px;
+                height: 45px;
+            }
+
+            .spectrum-preview-text div {
+                font-size: 0.75rem;
+            }
+
+            .spectrum-preview-text strong {
                 font-size: 0.85rem;
             }
         }
