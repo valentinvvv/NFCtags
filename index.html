@@ -195,6 +195,17 @@
             margin-top: 1rem;
         }
 
+        .button-group-full {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .button-group-full .full-width-btn {
+            grid-column: 1 / -1;
+        }
+
         .button-row {
             display: flex;
             gap: 0.5rem;
@@ -326,7 +337,7 @@
             font-size: 0.75rem;
             white-space: pre-wrap;
             word-break: break-all;
-            max-height: 400px;
+            max-height: 600px;
             overflow-y: auto;
             margin-bottom: 0.75rem;
             border: 1px solid var(--border);
@@ -815,6 +826,14 @@
                 grid-template-columns: 1fr;
             }
 
+            .button-group-full {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group-full .full-width-btn {
+                grid-column: auto;
+            }
+
             .color-palette {
                 grid-template-columns: repeat(6, 1fr);
             }
@@ -1257,20 +1276,32 @@
 
                     <div class="status-message" id="writeStatus"></div>
                     
-                    <div class="button-group" style="margin-top: 1.5rem;">
+                    <!-- Button Layout: Write + Download (2 cols), Back to Menu (full width) -->
+                    <div class="button-group-full" style="margin-top: 1.5rem;">
+                        <button class="btn-secondary" onclick="app.toggleWrite()">📝 Write to NFC</button>
                         <button class="btn-secondary" onclick="app.downloadFile()">💾 Download for NFC</button>
-                        <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
+                        <button class="full-width-btn btn-secondary" onclick="app.setMode('menu')" style="grid-column: 1 / -1;">← Back to Menu</button>
                     </div>
                 </div>
 
                 <!-- Right Side: JSON Preview (sticky on desktop, bottom on mobile) -->
                 <div class="json-preview-section">
                     <div class="json-preview-label">📋 JSON Preview (OpenSpool Format)</div>
-                    <div class="json-preview" id="jsonPreview">{\n  "filament_settings_id": ["Generic PETG"],\n  "filament_vendor": ["Generic"],\n  "from": "User",\n  "inherits": "Generic PETG",\n  "is_custom_defined": "0",\n  "name": "Generic PETG",\n  "nozzle_temperature": ["235"],\n  "nozzle_temperature_initial_layer": ["230"],\n  "textured_plate_temp": ["75"],\n  "textured_plate_temp_initial_layer": ["74"],\n  "version": "2.2.42.2"\n}</div>
+                    <div class="json-preview" id="jsonPreview">{
+  "filament_settings_id": ["Generic PETG"],
+  "filament_vendor": ["Generic"],
+  "from": "User",
+  "inherits": "Generic PETG",
+  "is_custom_defined": "0",
+  "name": "Generic PETG",
+  "nozzle_temperature": ["235"],
+  "nozzle_temperature_initial_layer": ["230"],
+  "textured_plate_temp": ["75"],
+  "textured_plate_temp_initial_layer": ["74"],
+  "version": "2.2.42.2"
+}</div>
                     <button class="copy-button" onclick="app.copyJsonToClipboard()">📋 Copy JSON</button>
                     <button class="btn-primary" onclick="app.downloadJsonFile()" style="padding: 0.5rem; margin-bottom: 1rem;">💾 Download JSON</button>
-                    
-                    <button class="btn-secondary" id="writeBtn" onclick="app.toggleWrite()" style="padding: 0.75rem; margin-bottom: 0;">📝 Write to NFC</button>
                 </div>
             </div>
         </div>
