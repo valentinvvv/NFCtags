@@ -1,6 +1,11 @@
 #spectrumHue, #spectrumHueSlider {
     touch-action: none;
 }
+
+#spectrumSV, #spectrumSVPointer {
+    touch-action: none;
+}
+
 /* Color Spectrum Picker */
 .color-spectrum-modal {
     display: none; /* Скрыто по умолчанию */
@@ -27,6 +32,7 @@
     max-width: 400px;
     width: 90%;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    touch-action: none;
 }
 
 .spectrum-container {
@@ -50,6 +56,9 @@
   cursor: crosshair;
   position: relative;
   margin-bottom: 1rem;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .spectrum-hue-slider {
@@ -76,6 +85,9 @@
   position: relative;
   margin-bottom: 1rem;
   border: 1px solid var(--border);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .spectrum-sv-pointer {
@@ -119,6 +131,7 @@
   -webkit-appearance: none;
   appearance: none;
   background: var(--bg-tertiary);
+  touch-action: none;
 }
 
 .slider-group input[type="range"]::-webkit-slider-thumb {
@@ -201,6 +214,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  touch-action: none;
 }
 
 .spectrum-buttons .btn-ok {
@@ -221,6 +235,7 @@
 .spectrum-buttons .btn-cancel:hover {
   background: var(--border);
 }
+
 /* На мобильных устройствах */
 @media (max-width: 640px) {
   .color-picker-modal {
