@@ -1,2 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filament Tag Generator</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent: #ff6b35;
+            --accent-hover: #ff8555;
+            --accent-active: #e55a24;
+            --border: #444;
+            --success: #4caf50;
+            --success-hover: #45a049;
+            --error: #f44336;
+            --error-hover: #da190b;
+            --warning: #ff9800;
+            --warning-hover: #e68900;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        header a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* ===== UNIFIED BUTTON STYLING ===== */
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:not(:disabled):active {
+            transform: translateY(1px);
+        }
+
+        /* Primary Button Style */
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            background: var(--accent-active);
+            border-color: var(--accent-active);
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Secondary Button Style (Now Unified) */
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--accent);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-secondary:active:not(:disabled) {
+            background: var(--accent-active);
+            border-color: var(--accent-active);
+        }
+
+        /* Success Button Style */
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: 2px solid var(--success);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: var(--success-hover);
+            border-color: var(--success-hover);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-success:active:not(:disabled) {
+            background: #3d8b40;
+            border-color: #3d8b40;
+        }
+
+        /* Warning/Danger Button Style */
+        .btn-warning {
+            background: var(--error);
+            color: white;
+            border: 2px solid var(--error);
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: var(--error-hover);
+            border-color: var(--error-hover);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-warning:active:not(:disabled) {
+            background: #c41c3b;
+            border-color: #c41c3b;
+        }
+
+        /* Small Buttons (for compact areas like JSON preview) */
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+
+        .btn-small.btn-secondary {
+            border: 1px solid var(--border);
+        }
+
+        .btn-small.btn-secondary:hover:not(:disabled) {
+            border-color: var(--accent);
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.2);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .button-group.full-width button {
+            width: 100%;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* ===== NFC OPERATION FEEDBACK ===== */
+        .nfc-status {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .nfc-status.ready {
+            border-color: var(--success);
+            background: rgba(76, 175, 80, 0.08);
+        }
+
+        .nfc-status.error {
+            border-color: var(--error);
+            background: rgba(244, 67, 54, 0.08);
+        }
+
+        .nfc-indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--error);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 8px rgba(244, 67, 54, 0.5);
+        }
+
+        .nfc-indicator.ready {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+            animation: pulse-success 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-success {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .status-message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: none;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-message.error {
+            background: rgba(244, 67, 54, 0.15);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .status-message.warning {
+            background: rgba(255, 152, 0, 0.15);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        /* Progress indicator for NFC operations */
+        .operation-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(255, 107, 53, 0.1);
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            animation: highlightFlash 0.6s ease;
+        }
+
+        @keyframes highlightFlash {
+            0% { background: rgba(255, 107, 53, 0.3); }
+            100% { background: rgba(255, 107, 53, 0.1); }
+        }
+
+        .operation-indicator.show {
+            display: flex;
+        }
+
+        .operation-indicator.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 107, 53, 0.3);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            padding: 0.75rem;
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 35px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.selected {
+            border-color: var(--accent);
+            border-width: 3px;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .decoded-data {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .json-preview-section {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .json-preview-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .json-preview {
+            background: var(--bg-secondary);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            color: #4caf50;
+        }
+
+        .json-preview::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .json-preview::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+
+        .json-preview::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .json-preview::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .validation-alert {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        .validation-alert.valid {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .validation-alert.warning {
+            background: rgba(255, 152, 0, 0.15);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        #spectrumHue,
+        #spectrumSV,
+        #spectrumSVPointer {
+            touch-action: none;
+        }
+
+        /* Color Spectrum Picker */
+        .color-spectrum-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .color-spectrum-modal.show {
+            display: flex !important;
+        }
+
+        .color-spectrum-picker {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .spectrum-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .spectrum-hue {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(to right,
+                    #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff0000);
+            border-radius: 4px;
+            cursor: crosshair;
+            position: relative;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            border: none;
+        }
+
+        .spectrum-hue-slider {
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: white;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .spectrum-sv {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                    white 0%,
+                    var(--spectrum-hue-color, #ff0000) 50%,
+                    black 100%);
+            border-radius: 4px;
+            cursor: crosshair;
+            position: relative;
+            border: 1px solid var(--border);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .spectrum-sv-pointer {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-6px, -6px);
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .spectrum-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spectrum-sv-container {
+            width: 100%;
+            position: relative;
+            aspect-ratio: 1;
+            min-height: 180px;
+        }
+
+        .spectrum-sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .slider-group label {
+            min-width: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            border: none;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-tertiary);
+            touch-action: none;
+        }
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-group input[type="text"] {
+            width: 60px;
+            padding: 0.4rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-family: monospace;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .spectrum-preview {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .spectrum-preview-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            background: var(--spectrum-color, #ffffff);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .spectrum-preview-text {
+            flex: 1;
+        }
+
+        .spectrum-preview-text div {
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .spectrum-preview-text strong {
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .spectrum-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .spectrum-buttons button {
+            flex: 1;
+            touch-action: none;
+        }
+
+        /* Camera Picker Modal */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .camera-modal.show {
+            display: flex !important;
+        }
+
+        .camera-container {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .camera-stream {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            margin-bottom: 1.5rem;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: inset 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .camera-preview {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .camera-color-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .camera-color-text {
+            flex: 1;
+        }
+
+        .camera-color-text div {
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .camera-color-text strong {
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .camera-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .camera-buttons button {
+            flex: 1;
+        }
+
+        /* Desktop and Tablet */
+        @media (max-width: 900px) {
+            .form-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile - JSON preview goes below buttons */
+        @media (max-width: 768px) {
+            .form-content {
+                grid-template-columns: 1fr;
+            }
+
+            .json-preview-section {
+                order: 2;
+                margin-top: 2rem;
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+
+            .form-row,
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                padding: 0.65rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .color-palette {
+                grid-template-columns: repeat(6, 1fr);
+            }
+
+            .color-spectrum-picker {
+                width: 95vw;
+                max-width: 95vw;
+                padding: 1rem;
+                border-radius: 8px;
+            }
+
+            .spectrum-sv-container {
+                min-height: 140px;
+            }
+
+            .spectrum-hue {
+                height: 24px;
+            }
+
+            .spectrum-wrapper {
+                gap: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .spectrum-sliders {
+                gap: 0.7rem;
+                margin-bottom: 1rem;
+            }
+
+            .slider-group {
+                gap: 0.5rem;
+            }
+
+            .slider-group label {
+                min-width: 25px;
+                font-size: 0.85rem;
+            }
+
+            .slider-group input[type="text"] {
+                width: 50px;
+                padding: 0.3rem;
+                font-size: 0.85rem;
+            }
+
+            .spectrum-preview {
+                gap: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .spectrum-preview-box {
+                width: 50px;
+                height: 50px;
+                flex-shrink: 0;
+            }
+
+            .spectrum-preview-text div {
+                margin-bottom: 0.3rem;
+                font-size: 0.8rem;
+            }
+
+            .spectrum-preview-text strong {
+                font-size: 0.9rem;
+            }
+
+            .camera-container {
+                width: 95vw;
+                max-width: 95vw;
+                padding: 1rem;
+            }
+
+            .camera-stream {
+                aspect-ratio: 16 / 9;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .color-spectrum-picker {
+                padding: 0.75rem;
+            }
+
+            .spectrum-sv-container {
+                min-height: 120px;
+            }
+
+            .spectrum-hue {
+                height: 20px;
+            }
+
+            .spectrum-wrapper {
+                gap: 0.5rem;
+            }
+
+            .spectrum-sliders {
+                gap: 0.6rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .slider-group label {
+                font-size: 0.8rem;
+            }
+
+            .spectrum-preview-box {
+                width: 45px;
+                height: 45px;
+            }
+
+            .spectrum-preview-text div {
+                font-size: 0.75rem;
+            }
+
+            .spectrum-preview-text strong {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🧵 Filament Tag Generator</h1>
+        <p>
+            <a href="https://openspool.io/rfic.html" target="_blank">OpenSpool</a> format
+        </p>
+    </header>
+
+    <div class="container">
+        <!-- Mode Selection -->
+        <div id="modeSelection" class="section">
+            <h2 class="section-title">What would you like to do?</h2>
+            <div class="button-group" style="margin-top: 2rem; gap: 1.5rem;">
+                <button class="btn-success" onclick="app.setMode('read')" style="padding: 1.5rem; font-size: 1.1rem;">
+                    📖 Read / Update Tag
+                </button>
+                <button class="btn-success" onclick="app.setMode('create')" style="padding: 1.5rem; font-size: 1.1rem;">
+                    ✏️ Create New Tag
+                </button>
+            </div>
+        </div>
+
+        <!-- Read Section -->
+        <div id="readSection" class="section hidden">
+            <h2 class="section-title">📖 Read NFC Tag or Upload File</h2>
+
+            <div class="nfc-status" id="nfcStatus">
+                <div class="nfc-indicator" id="nfcIndicator"></div>
+                <span id="nfcStatusText">Checking NFC...</span>
+            </div>
+
+            <button id="scanBtn" class="btn-primary" onclick="app.toggleScan()" style="width: 100%;">▶️ Start Scanning</button>
+
+            <div class="status-message" id="readStatus"></div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label>Or Upload File</label>
+                <input type="file" id="fileInput" accept=".json,.bin">
+                <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                    Supports .json (OpenSpool)
+                </small>
+            </div>
+
+            <div id="decodedDataContainer" class="hidden" style="margin-top: 1rem;">
+                <label>Decoded Data</label>
+                <div class="decoded-data" id="decodedData"></div>
+            </div>
+
+            <button class="btn-secondary" onclick="app.setMode('menu')" style="margin-top: 1rem; width: 100%;">
+                ← Back to Menu
+            </button>
+        </div>
+
+        <!-- Form Section -->
+        <div id="formSection" class="section hidden">
+            <h2 class="section-title">✏️ <span id="formTitle">Create New Tag</span></h2>
+            
+            <div class="form-content">
+                <!-- Left Side: Form Controls + Buttons -->
+                <div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="materialTypeInput">Material Type</label>
+                            <input type="text" id="materialTypeInput" list="materialList" placeholder="Select or type material"
+                                class="full-width" onchange="app.applyTemperaturePreset()">
+                            <datalist id="materialList">
+                                <option value="PLA">
+                                <option value="PETG">
+                                <option value="ABS">
+                                <option value="ASA">
+                                <option value="BVOH">
+                                <option value="easyPETG">
+                                <option value="ecoPLA">
+                                <option value="HIPS">
+                                <option value="PA">
+                                <option value="PA6">
+                                <option value="PA12">
+                                <option value="PC">
+                                <option value="PEBA">
+                                <option value="PEI">
+                                <option value="PEEK">
+                                <option value="PP">
+                                <option value="PCTG">
+                                <option value="PVA">
+                                <option value="TPE">
+                                <option value="TPU">
+                                <!-- CF Variants -->
+                                <option value="ABS-CF">
+                                <option value="ASA-CF">
+                                <option value="easyPETG-CF">
+                                <option value="ecoPLA-CF">
+                                <option value="ePAHT-CF">
+                                <option value="HIPS-CF">
+                                <option value="PA-CF">
+                                <option value="PA6-CF">
+                                <option value="PA12-CF">
+                                <option value="PEBA-CF">
+                                <option value="PEI-CF">
+                                <option value="PEEK-CF">
+                                <option value="PETG-CF">
+                                <option value="PC-CF">
+                                <option value="PP-CF">
+                                <option value="PCTG-CF">
+                                <option value="TPE-CF">
+                                <option value="TPU-CF">
+                                <!-- GF Variants -->
+                                <option value="ABS-GF">
+                                <option value="ASA-GF">
+                                <option value="easyPETG-GF">
+                                <option value="ecoPLA-GF">
+                                <option value="PA-GF">
+                                <option value="PA6-GF">
+                                <option value="PA12-GF">
+                                <option value="PEBA-GF">
+                                <option value="PEI-GF">
+                                <option value="PEEK-GF">
+                                <option value="PETG-GF">
+                                <option value="PC-GF">
+                                <option value="PP-GF">
+                                <option value="PCTG-GF">
+                                <option value="TPE-GF">
+                                <option value="TPU-GF">
+                                <!-- Special -->
+                                <option value="Carbon-Graphene">
+                                <option value="Metal-Brass">
+                                <option value="Metal-Bronze">
+                                <option value="Metal-Copper">
+                                <option value="Nylon-Hydrophobic-CF">
+                                <option value="Stone">
+                                <option value="Wood">
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="subTypeInput">Type</label>
+                            <input type="text" id="subTypeInput" list="subTypeList" placeholder="Select or type subtype"
+                                class="full-width">
+                            <datalist id="subTypeList">
+                                <option value="Basic">
+                                <option value="Glitter">
+                                <option value="Matte Finish">
+                                <option value="Translucent">
+                                <option value="Transparent">
+                                <option value="Rainbow">
+                                <option value="Silk Finish">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Color (Primary)</label>
+                        <div class="color-palette" id="colorPalette"></div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}" style="flex: 1; min-width: 100px;">
+
+                            <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 40px; height: 40px; border-radius: 4px;
+                                        border: 2px solid var(--border); background: #FFFFFF;
+                                        cursor: pointer; touch-action: manipulation; flex-shrink: 0;">
+                            </div>
+
+                            <button class="btn-primary" onclick="app.toggleCameraPicker()" style="padding: 0.6rem 1rem; width: auto; flex-shrink: 0; margin-top: 0;">
+                                📷
+                            </button>
+
+                            <!-- Color Spectrum Picker Modal -->
+                            <div id="colorSpectrumModal" class="color-spectrum-modal hidden"
+                                onclick="if(event.target === this) app.closeColorPicker()">
+                                <div class="color-spectrum-picker">
+                                    <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color
+                                    </h3>
+
+                                    <!-- Saturation & Brightness Picker (square) -->
+                                    <div class="spectrum-wrapper">
+                                        <div class="spectrum-sv-container">
+                                            <div class="spectrum-sv" id="spectrumSV">
+                                                <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hue Bar (horizontal, below) -->
+                                        <div class="spectrum-hue" id="spectrumHue">
+                                            <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- RGB Sliders -->
+                                    <div class="spectrum-sliders">
+                                        <div class="slider-group">
+                                            <label>R:</label>
+                                            <input type="range" id="spectrumR" min="0" max="255" value="255">
+                                            <input type="text" id="spectrumRText" maxlength="3" value="255">
+                                        </div>
+                                        <div class="slider-group">
+                                            <label>G:</label>
+                                            <input type="range" id="spectrumG" min="0" max="255" value="255">
+                                            <input type="text" id="spectrumGText" maxlength="3" value="255">
+                                        </div>
+                                        <div class="slider-group">
+                                            <label>B:</label>
+                                            <input type="range" id="spectrumB" min="0" max="255" value="255">
+                                            <input type="text" id="spectrumBText" maxlength="3" value="255">
+                                        </div>
+                                    </div>
+
+                                    <!-- Preview -->
+                                    <div class="spectrum-preview">
+                                        <div class="spectrum-preview-box" id="spectrumPreviewBox"></div>
+                                        <div class="spectrum-preview-text">
+                                            <div>HEX: <strong id="spectrumHexDisplay">#FFFFFF</strong></div>
+                                            <div>RGB: <strong id="spectrumRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="spectrum-buttons">
+                                        <button class="btn-success" onclick="app.confirmColorPicker()">✓ OK</button>
+                                        <button class="btn-secondary" onclick="app.closeColorPicker()">✕ Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Camera Color Picker Modal -->
+                            <div id="cameraModal" class="camera-modal hidden"
+                                onclick="if(event.target === this) app.closeCameraPicker()">
+                                <div class="camera-container">
+                                    <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-primary);">Capture Color from Camera</h3>
+                                    
+                                    <div class="camera-stream">
+                                        <video id="cameraFeed" autoplay playsinline></video>
+                                        <div class="camera-crosshair"></div>
+                                    </div>
+
+                                    <div class="camera-preview">
+                                        <div class="camera-color-box" id="cameraColorBox"></div>
+                                        <div class="camera-color-text">
+                                            <div>HEX: <strong id="cameraHexDisplay">#FFFFFF</strong></div>
+                                            <div>RGB: <strong id="cameraRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="camera-buttons">
+                                        <button class="btn-success" onclick="app.useCameraColor()">✓ Use Color</button>
+                                        <button class="btn-secondary" onclick="app.closeCameraPicker()">✕ Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                            Enter hex color (e.g., FF5733, #FF5733) or use spectrum picker
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brandInput">Brand Name</label>
+                        <input type="text" id="brandInput" list="brandList" placeholder="Select or type a brand"
+                            class="full-width">
+                        <datalist id="brandList">
+                            <option value="Generic">
+                            <option value="Bambu Lab">
+                            <option value="eSun">
+                            <option value="Polymaker">
+                            <option value="Hatchbox">
+                            <option value="Overture">
+                            <option value="SUNLU">
+                            <option value="Prusament">
+                            <option value="Jayo">
+                            <!-- The specific brands you requested -->
+                            <option value="3DJake">
+                            <option value="Anycubic">
+                            <option value="AzureFilm">
+                            <option value="ColorFabb">
+                            <option value="Elegoo">
+                            <option value="Extrudr">
+                            <option value="Fiberlogy">
+                            <option value="Fillamentum">
+                            <option value="FormFutura">
+                            <option value="Geeetech">
+                            <option value="Kimya">
+                            <option value="Spectrum">
+                        </datalist>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Nozzle Temp (°C)</label>
+                            <input type="number" id="minTemp" placeholder="220" value="220" onchange="app.updateJsonPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Nozzle Temp (°C)</label>
+                            <input type="number" id="maxTemp" placeholder="240" value="240" onchange="app.updateJsonPreview()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Bed Temp (°C)</label>
+                            <input type="number" id="bedTempMin" placeholder="50" onchange="app.updateJsonPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Bed Temp (°C)</label>
+                            <input type="number" id="bedTempMax" placeholder="60" onchange="app.updateJsonPreview()">
+                        </div>
+                    </div>
+
+                    <div class="info-box" id="recordSizeInfo"
+                        style="margin-top: 1rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success); border: 1px solid;">
+                        📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>
+                    </div>
+
+                    <!-- Operation Indicator (Hidden by default) -->
+                    <div id="operationIndicator" class="operation-indicator hidden">
+                        <div class="spinner"></div>
+                        <span id="operationText">Processing...</span>
+                    </div>
+
+                    <div class="status-message" id="writeStatus"></div>
+
+                    <!-- NFC Buttons Section - Enhanced Styling -->
+                    <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <button class="btn-primary" id="writeNfcBtn" onclick="app.toggleWrite()" style="font-size: 1rem; padding: 1rem;">
+                            📝 Write to NFC
+                        </button>
+                        <button class="btn-secondary" id="downloadNfcBtn" onclick="app.downloadForNFC()" style="font-size: 1rem; padding: 1rem;">
+                            💾 Download for NFC
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Right Side: JSON Preview (goes below on mobile) -->
                 <div class="json-preview-section">
+                    <div class="json-preview-label">📋 JSON Preview (OpenSpool Format)</div>
+                    <div id="validationAlert" class="hidden"></div>
+                    <div class="json-preview" id="jsonPreview">{}
+                    </div>
+                    <div class="button-row">
+                        <button class="btn-secondary btn-small" onclick="app.copyJsonToClipboard()">📋 Copy</button>
+                        <button class="btn-secondary btn-small" onclick="app.downloadJsonFile()">⬇️ Download</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group" style="margin-top: 1rem; gap: 1rem;">
+                <button class="btn-secondary" onclick="app.setMode('menu')" style="padding: 0.75rem 1.5rem;">
+                    ← Back to Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>
+            Filament Tag Generator - Supporting
+            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a>
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            © 2025 <a href="https://github.com/paxx12/" target="_blank">paxx12</a> - Open Source Project
+        </p>
+    </footer>
+
+    <script src="openspool.js"></script>
+    <script src="filament-generator.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
