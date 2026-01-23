@@ -174,6 +174,12 @@ const app = {
     'Nylon-Hydrophobic-CF': { minTemp: 250, maxTemp: 280, bedTempMin: 80, bedTempMax: 100 }
   },
 
+  // Touch locking state
+  touchLock: {
+    active: false,
+    lockedTo: null  // 'hue' or 'sv'
+  },
+
   // ========================================================================
   // INITIALIZATION
   // ========================================================================
@@ -707,21 +713,27 @@ const app = {
       updateHue(e);
     });
 
-    // Touch events for hue
+    // Touch events for hue - ONLY if not locked to SV
     spectrumHue.addEventListener('touchstart', (e) => {
+      if (this.touchLock.lockedTo && this.touchLock.lockedTo !== 'hue') {
+        return;
+      }
       e.stopPropagation();
+      this.touchLock.active = true;
+      this.touchLock.lockedTo = 'hue';
       updateHue(e.touches[0]);
     }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      const rect = spectrumHue.getBoundingClientRect();
-      if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-          touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-        e.preventDefault();
-        updateHue(touch);
+      if (this.touchLock.active && this.touchLock.lockedTo === 'hue') {
+        updateHue(e.touches[0]);
       }
     }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+      this.touchLock.active = false;
+      this.touchLock.lockedTo = null;
+    });
 
     // ===== SATURATION/VALUE (S/V) PICKER HANDLING =====
     const updateSV = (e) => {
@@ -756,21 +768,28 @@ const app = {
       updateSV(e);
     });
 
-    // Touch events for S/V
+    // Touch events for S/V - ONLY if not locked to hue
     spectrumSV.addEventListener('touchstart', (e) => {
+      if (this.touchLock.lockedTo && this.touchLock.lockedTo !== 'sv') {
+        return;
+      }
       e.stopPropagation();
+      this.touchLock.active = true;
+      this.touchLock.lockedTo = 'sv';
       updateSV(e.touches[0]);
     }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      const rect = spectrumSV.getBoundingClientRect();
-      if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-          touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+      if (this.touchLock.active && this.touchLock.lockedTo === 'sv') {
         e.preventDefault();
-        updateSV(touch);
+        updateSV(e.touches[0]);
       }
     }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+      this.touchLock.active = false;
+      this.touchLock.lockedTo = null;
+    });
 
     // RGB sliders
     ['R', 'G', 'B'].forEach(channel => {
