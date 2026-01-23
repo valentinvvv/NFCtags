@@ -404,7 +404,7 @@ const app = {
       });
     }
 
-    const updateTriggers = ['brand', 'subTypeInput', 'materialTypeInput', 'minTemp', 'maxTemp', 'bedTempMin', 'bedTempMax'];
+    const updateTriggers = ['brandInput', 'subTypeInput', 'materialTypeInput', 'minTemp', 'maxTemp', 'bedTempMin', 'bedTempMax'];
     updateTriggers.forEach(id => {
       const element = document.getElementById(id);
       if (element) {
