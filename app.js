@@ -327,7 +327,8 @@ const app = {
       
       downloadJsonFile() {
           const formData = this.getFormData();
-          const jsonData = filamentGenerator.generateFromFormData(formData);
+          const result = filamentGenerator.generateFromFormData(formData);
+          const jsonData = result.json;
           
           const filamentName = jsonData.filament_settings_id[0];
           const filename = `${filamentName}`
@@ -335,8 +336,8 @@ const app = {
             .replace(/[^a-zA-Z0-9_]/g, '')
             .toLowerCase();
           
-          filamentGenerator.downloadJSON(jsonData, filename);
-          this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
+          filamentGenerator.downloadJsonFile(jsonData, filename);
+          this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
       },
       
       // ========================================================================
