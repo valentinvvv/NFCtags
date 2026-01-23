@@ -159,6 +159,14 @@
             align-items: start;
         }
 
+        /* NFC Action Buttons Container */
+        .nfc-buttons {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
         /* ===== UNIFIED BUTTON STYLING ===== */
         button {
             padding: 0.75rem 1.5rem;
@@ -931,6 +939,11 @@
                 grid-template-columns: 1fr;
             }
 
+            /* Stack NFC buttons vertically on mobile */
+            .nfc-buttons {
+                grid-template-columns: 1fr;
+            }
+
             button {
                 padding: 0.65rem 1rem;
                 font-size: 0.95rem;
@@ -1387,8 +1400,8 @@
 
                     <div class="status-message" id="writeStatus"></div>
 
-                    <!-- NFC Buttons Section - Enhanced Styling -->
-                    <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- NFC Buttons Section -->
+                    <div class="nfc-buttons">
                         <button class="btn-primary" id="writeNfcBtn" onclick="app.toggleWrite()" style="font-size: 1rem; padding: 1rem;">
                             📝 Write to NFC
                         </button>
