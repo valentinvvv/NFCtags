@@ -303,8 +303,15 @@ const app = {
                   .replace(/[^a-zA-Z0-9_]/g, '')
                   .toLowerCase();
 
-            filamentGenerator.downloadJSON(jsonData, filename);
-            this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
+            filamentGenerator.downloadJsonFile(jsonData, `${filename}.json`);
+            this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
+      },
+
+      downloadNFCJSON() {
+            const formData = this.getFormData();
+            const data = OpenSpool.generateData(formData);
+            OpenSpool.downloadNFCJSON(data);
+            this.showStatus('writeStatus', 'success', 'NFC data downloaded');
       },
 
       // ========================================================================
@@ -363,13 +370,13 @@ const app = {
                   if (result) {
                         output += `Format: OpenSpool (JSON)\n`;
                         output += `Material: ${result.materialType}\n`;
-                        output += `Type: ${result.subType}\n`;
+                        output += `Type: ${result.subtype}\n`;
                         output += `Brand: ${result.brand}\n`;
                         output += `Color: #${result.colorHex}\n`;
-                        output += `Min Nozzle Temp: #${result.min_temp}\n`;
-                        output += `Max Nozzle Temp: #${result.max_temp}\n`;
-                        output += `Min Bed Temp: #${result.bed_min_temp}\n`;
-                        output += `Max Bed Temp: #${result.bed_max_temp}\n`;
+                        output += `Min Nozzle Temp: ${result.minTemp}\n`;
+                        output += `Max Nozzle Temp: ${result.maxTemp}\n`;
+                        output += `Min Bed Temp: ${result.bedTempMin}\n`;
+                        output += `Max Bed Temp: ${result.bedTempMax}\n`;
 
                         break;
                   }
@@ -522,7 +529,6 @@ const app = {
             const writeBtn = document.getElementById('writeNfcBtn');
             const originalText = writeBtn.textContent;
             const formData = this.getFormData();
-            const result = filamentGenerator.generateFromFormData(formData);
             const data = OpenSpool.generateData(formData);
             const records = OpenSpool.createNDEFRecord(data);
 
@@ -544,48 +550,20 @@ const app = {
             if (status === 'reading') {
                   writeBtn.textContent = '❌ Cancel';
                   writeBtn.classList.remove('btn-primary');
-                  writeBtn.classList.add('btn-secondary');
+                  writeBtn.classList.add('btn-warning');
+                  this.showOperationIndicator(true, '📋 Waiting for NFC tag...');
                   this.showStatus('writeStatus', 'warning', 'Hold device near NFC tag...');
             } else if (status === 'writing') {
                   writeBtn.disabled = true;
                   writeBtn.textContent = '⏳ Writing...';
-                  this.showStatus('writeStatus', 'warning', 'Writing to tag...');
-            } else if (status === 'success') {
-                  writeBtn.textContent = originalText;
-                  writeBtn.classList.remove('btn-secondary');
-                  writeBtn.classList.add('btn-primary');
-                  this.showStatus('writeStatus', 'success', 'Tag written successfully');
-            } else if (status === 'error') {
-                  writeBtn.textContent = originalText;
-                  writeBtn.classList.remove('btn-secondary');
-                  writeBtn.classList.add('btn-primary');
-                  const errorMsg = error.name === 'NotAllowedError' ? 'NFC permission denied' :
-                        error.name === 'AbortError' ? 'Write cancelled' :
-                              error.message;
-                  this.showStatus('writeStatus', 'error', errorMsg);
-            }
-      },
-
-      handleWriteProgress(writeBtn, originalText, status, error) {
-            writeBtn.disabled = false;
-
-            if (status === 'reading') {
-                  writeBtn.textContent = '\u274c Cancel';
-                  writeBtn.classList.remove('btn-primary');
-                  writeBtn.classList.add('btn-warning');
-                  this.showOperationIndicator(true, '\ud83d\udcd6 Waiting for NFC tag...');
-                  this.showStatus('writeStatus', 'warning', 'Hold device near NFC tag...');
-            } else if (status === 'writing') {
-                  writeBtn.disabled = true;
-                  writeBtn.textContent = '\u231f Writing...';
-                  this.showOperationIndicator(true, '\ud83d\udcdd Writing to tag...');
+                  this.showOperationIndicator(true, '📝 Writing to tag...');
                   this.showStatus('writeStatus', 'warning', 'Writing to tag...');
             } else if (status === 'success') {
                   writeBtn.textContent = originalText;
                   writeBtn.classList.remove('btn-warning');
                   writeBtn.classList.add('btn-primary');
                   this.showOperationIndicator(false);
-                  this.showStatus('writeStatus', 'success', '\u2713 Tag written successfully!');
+                  this.showStatus('writeStatus', 'success', '✓ Tag written successfully!');
             } else if (status === 'error') {
                   writeBtn.textContent = originalText;
                   writeBtn.classList.remove('btn-warning');
@@ -625,14 +603,6 @@ const app = {
             writeBtn.classList.remove('btn-secondary');
             writeBtn.classList.add('btn-primary');
             this.showStatus('writeStatus', '', '');
-      },
-
-      downloadForNFC() {
-            const formData = this.getFormData();
-            const result = filamentGenerator.generateFromFormData(formData);
-            const data = OpenSpool.generateData(formData);
-            OpenSpool.downloadNFCJSON(data);
-            this.showStatus('writeStatus', 'success', 'File downloaded');
       },
 
       // ========================================================================
