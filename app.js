@@ -174,11 +174,8 @@ const app = {
     'Nylon-Hydrophobic-CF': { minTemp: 250, maxTemp: 280, bedTempMin: 80, bedTempMax: 100 }
   },
 
-  // State for drag operations
-  dragState: {
-    isHueDragging: false,
-    isSVDragging: false
-  },
+  // State tracking
+  lastHue: null,  // Track last hue value to avoid redundant CSS updates
 
   // ========================================================================
   // INITIALIZATION
@@ -673,9 +670,6 @@ const app = {
     const modal = document.getElementById('colorSpectrumModal');
     modal.classList.remove('show');
     modal.classList.add('hidden');
-    // Stop any ongoing drag
-    this.dragState.isHueDragging = false;
-    this.dragState.isSVDragging = false;
   },
 
   confirmColorPicker() {
@@ -691,7 +685,6 @@ const app = {
     const spectrumSV = document.getElementById('spectrumSV');
 
     // ===== HUE SLIDER HANDLING =====
-    // Handle both click and drag for hue
     const updateHue = (e) => {
       const rect = spectrumHue.getBoundingClientRect();
       const x = (e.clientX !== undefined ? e.clientX : e.pageX) - rect.left;
@@ -700,24 +693,16 @@ const app = {
       this.updateSpectrumFromHSV();
     };
 
-    // Mouse events for hue - only respond to clicks directly on the hue bar
+    // Mouse events for hue
     spectrumHue.addEventListener('mousedown', (e) => {
       e.stopPropagation();
-      this.dragState.isHueDragging = true;
       updateHue(e);
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (this.dragState.isHueDragging) {
-        const spectrumHue = document.getElementById('spectrumHue');
-        if (spectrumHue) {
-          updateHue(e);
-        }
+      if (spectrumHue.matches(':active') || document.mouseDownElement === spectrumHue) {
+        updateHue(e);
       }
-    });
-
-    document.addEventListener('mouseup', () => {
-      this.dragState.isHueDragging = false;
     });
 
     // Click on hue bar
@@ -729,20 +714,18 @@ const app = {
     // Touch events for hue
     spectrumHue.addEventListener('touchstart', (e) => {
       e.stopPropagation();
-      this.dragState.isHueDragging = true;
       updateHue(e.touches[0]);
     }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
-      if (this.dragState.isHueDragging) {
+      const touch = e.touches[0];
+      const rect = spectrumHue.getBoundingClientRect();
+      if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+          touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
         e.preventDefault();
-        updateHue(e.touches[0]);
+        updateHue(touch);
       }
     }, { passive: false });
-
-    document.addEventListener('touchend', () => {
-      this.dragState.isHueDragging = false;
-    });
 
     // ===== SATURATION/VALUE (S/V) PICKER HANDLING =====
     const updateSV = (e) => {
@@ -757,27 +740,20 @@ const app = {
       pointer.style.left = saturation + '%';
       pointer.style.top = (100 - value) + '%';
 
-      this.updateSpectrumFromHSV();
+      // ONLY update RGB and display - NO hue background color update
+      this.updateRGBFromHSV();
     };
 
     // Mouse events for S/V
     spectrumSV.addEventListener('mousedown', (e) => {
       e.stopPropagation();
-      this.dragState.isSVDragging = true;
       updateSV(e);
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (this.dragState.isSVDragging) {
-        const spectrumSV = document.getElementById('spectrumSV');
-        if (spectrumSV) {
-          updateSV(e);
-        }
+      if (spectrumSV.matches(':active') || document.mouseDownElement === spectrumSV) {
+        updateSV(e);
       }
-    });
-
-    document.addEventListener('mouseup', () => {
-      this.dragState.isSVDragging = false;
     });
 
     // Click on S/V area
@@ -789,20 +765,18 @@ const app = {
     // Touch events for S/V
     spectrumSV.addEventListener('touchstart', (e) => {
       e.stopPropagation();
-      this.dragState.isSVDragging = true;
       updateSV(e.touches[0]);
     }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
-      if (this.dragState.isSVDragging) {
+      const touch = e.touches[0];
+      const rect = spectrumSV.getBoundingClientRect();
+      if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+          touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
         e.preventDefault();
-        updateSV(e.touches[0]);
+        updateSV(touch);
       }
     }, { passive: false });
-
-    document.addEventListener('touchend', () => {
-      this.dragState.isSVDragging = false;
-    });
 
     // RGB sliders
     ['R', 'G', 'B'].forEach(channel => {
@@ -842,7 +816,68 @@ const app = {
     document.getElementById('spectrumGText').value = rgb.g;
     document.getElementById('spectrumBText').value = rgb.b;
 
+    // Update hue background ONLY when hue slider moves
+    this.updateHueGradient(hue);
     this.updateSpectrumDisplay(rgb.r, rgb.g, rgb.b);
+  },
+
+  updateRGBFromHSV() {
+    const hueSlider = document.getElementById('spectrumHueSlider');
+    const svPointer = document.getElementById('spectrumSVPointer');
+
+    const hue = (parseFloat(hueSlider.style.left) || 0) * 3.6;
+    const saturation = parseFloat(svPointer.style.left) || 0;
+    const value = 100 - (parseFloat(svPointer.style.top) || 0);
+
+    const rgb = this.hsvToRgb(hue, saturation, value);
+
+    document.getElementById('spectrumR').value = rgb.r;
+    document.getElementById('spectrumG').value = rgb.g;
+    document.getElementById('spectrumB').value = rgb.b;
+
+    document.getElementById('spectrumRText').value = rgb.r;
+    document.getElementById('spectrumGText').value = rgb.g;
+    document.getElementById('spectrumBText').value = rgb.b;
+
+    // Update display BUT NOT hue gradient
+    this.updateSpectrumDisplayOnly(rgb.r, rgb.g, rgb.b);
+  },
+
+  updateHueGradient(hue) {
+    // Only update CSS variable if hue actually changed
+    if (this.lastHue === hue) return;
+    
+    const hueRgb = this.hsvToRgb(hue, 100, 100);
+    const hueColor = `#${[hueRgb.r, hueRgb.g, hueRgb.b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+    document.getElementById('spectrumSV').style.setProperty('--spectrum-hue-color', hueColor);
+    
+    this.lastHue = hue;
+  },
+
+  updateSpectrumDisplay(r, g, b) {
+    const hex = '#' + [r, g, b].map(x => {
+      const hex = x.toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }).join('').toUpperCase();
+
+    document.getElementById('spectrumPreviewBox').style.background = hex;
+    document.getElementById('spectrumHexDisplay').textContent = hex;
+    document.getElementById('spectrumRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
+
+    const hsv = this.rgbToHsv(r, g, b);
+    this.updateHueGradient(hsv.h);
+  },
+
+  updateSpectrumDisplayOnly(r, g, b) {
+    const hex = '#' + [r, g, b].map(x => {
+      const hex = x.toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }).join('').toUpperCase();
+
+    document.getElementById('spectrumPreviewBox').style.background = hex;
+    document.getElementById('spectrumHexDisplay').textContent = hex;
+    document.getElementById('spectrumRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
+    // Do NOT update hue gradient here
   },
 
   updateSpectrumFromRGB() {
@@ -862,22 +897,6 @@ const app = {
     document.getElementById('spectrumSVPointer').style.top = (100 - hsv.v) + '%';
 
     this.updateSpectrumDisplay(r, g, b);
-  },
-
-  updateSpectrumDisplay(r, g, b) {
-    const hex = '#' + [r, g, b].map(x => {
-      const hex = x.toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('').toUpperCase();
-
-    document.getElementById('spectrumPreviewBox').style.background = hex;
-    document.getElementById('spectrumHexDisplay').textContent = hex;
-    document.getElementById('spectrumRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
-
-    const hsv = this.rgbToHsv(r, g, b);
-    const hueRgb = this.hsvToRgb(hsv.h, 100, 100);
-    const hueColor = `#${[hueRgb.r, hueRgb.g, hueRgb.b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
-    document.getElementById('spectrumSV').style.setProperty('--spectrum-hue-color', hueColor);
   },
 
   hexToRgb(hex) {
