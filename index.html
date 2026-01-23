@@ -355,6 +355,8 @@
             width: 90%;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             touch-action: none;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .spectrum-container {
@@ -565,6 +567,130 @@
             background: var(--border);
         }
 
+        /* Camera Picker Modal */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .camera-modal.show {
+            display: flex !important;
+        }
+
+        .camera-container {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .camera-stream {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            margin-bottom: 1.5rem;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: inset 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .camera-preview {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .camera-color-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .camera-color-text {
+            flex: 1;
+        }
+
+        .camera-color-text div {
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .camera-color-text strong {
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .camera-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .camera-buttons button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .camera-buttons .btn-use {
+            background: var(--accent);
+            color: white;
+        }
+
+        .camera-buttons .btn-use:hover {
+            background: var(--accent-hover);
+        }
+
+        .camera-buttons .btn-close {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .camera-buttons .btn-close:hover {
+            background: var(--border);
+        }
+
         /* Desktop and Tablet */
         @media (max-width: 640px) {
             .container {
@@ -651,6 +777,16 @@
             .spectrum-buttons button {
                 padding: 0.6rem;
                 font-size: 0.9rem;
+            }
+
+            .camera-container {
+                width: 95vw;
+                max-width: 95vw;
+                padding: 1rem;
+            }
+
+            .camera-stream {
+                aspect-ratio: 16 / 9;
             }
         }
 
@@ -843,13 +979,17 @@
             <div class="form-group">
                 <label>Color (Primary)</label>
                 <div class="color-palette" id="colorPalette"></div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}" style="flex: 1; min-width: 100px;">
 
-                    <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 60px; height: 40px; border-radius: 4px;
+                    <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 40px; height: 40px; border-radius: 4px;
                                 border: 2px solid var(--border); background: #FFFFFF;
-                                cursor: pointer; touch-action: manipulation;">
+                                cursor: pointer; touch-action: manipulation; flex-shrink: 0;">
                     </div>
+
+                    <button class="btn-primary" onclick="app.toggleCameraPicker()" style="padding: 0.6rem 1rem; width: auto; flex-shrink: 0; margin-top: 0;">
+                        📷
+                    </button>
 
                     <!-- Color Spectrum Picker Modal -->
                     <div id="colorSpectrumModal" class="color-spectrum-modal hidden"
@@ -907,9 +1047,35 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Camera Color Picker Modal -->
+                    <div id="cameraModal" class="camera-modal hidden"
+                        onclick="if(event.target === this) app.closeCameraPicker()">
+                        <div class="camera-container">
+                            <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-primary);">Capture Color from Camera</h3>
+                            
+                            <div class="camera-stream">
+                                <video id="cameraFeed" autoplay playsinline></video>
+                                <div class="camera-crosshair"></div>
+                            </div>
+
+                            <div class="camera-preview">
+                                <div class="camera-color-box" id="cameraColorBox"></div>
+                                <div class="camera-color-text">
+                                    <div>HEX: <strong id="cameraHexDisplay">#FFFFFF</strong></div>
+                                    <div>RGB: <strong id="cameraRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                </div>
+                            </div>
+
+                            <div class="camera-buttons">
+                                <button class="btn-use" onclick="app.useCameraColor()">✓ Use Color</button>
+                                <button class="btn-close" onclick="app.closeCameraPicker()">✕ Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
-                    Enter hex color (e.g., FF5733, #FF5733)
+                    Enter hex color (e.g., FF5733, #FF5733) or use spectrum picker
                 </small>
             </div>
 
