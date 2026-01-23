@@ -101,49 +101,12 @@ const OpenSpool = {
 },
 
   /**
-   * Download OpenSpool data as JSON file
-   * @param {Object} data - OpenSpool data object
-   * @param {string} filename - Output filename
-   */
-  downloadNFCJSON(data, filename = 'openspool.json') {
-    const jsonStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    
-    anchor.href = url;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    URL.revokeObjectURL(url);
-  },
-
-  /**
-   * Parse OpenSpool from JSON text or buffer
-   * @param {string|ArrayBuffer} buffer - JSON text or binary data
-   * @returns {Object|null} Parsed form data or null on error
-   */
-  readFromBuffer(buffer) {
-    try {
-      const text = typeof buffer === 'string' 
-        ? buffer 
-        : new TextDecoder().decode(buffer);
-      
-      const jsonData = JSON.parse(text);
-      return this.parseData(jsonData);
-    } catch (e) {
-      console.error('Error reading OpenSpool JSON:', e);
-      return null;
-    }
-  },
-
-  /**
    * Calculate the size needed for NDEF encoding
-   * @param {Object} data - OpenSpool data object
+   * @param {Object} formData - Form data object
    * @returns {number} Size in bytes
    */
-  calculateRecordSize(data) {
+  calculateRecordSize(formData) {
+    const data = this.generateData(formData);
     const jsonStr = JSON.stringify(data);
     const encoder = new TextEncoder();
     const payload = encoder.encode(jsonStr);
