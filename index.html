@@ -112,7 +112,6 @@
             color: var(--text-primary);
             font-size: 1rem;
             
-            /* New styles */
             -webkit-appearance: none;
             appearance: none;
             line-height: 1.2;
@@ -126,7 +125,7 @@
             -webkit-text-fill-color: var(--text-primary);
             -webkit-box-shadow: 0 0 0 1000px var(--bg-tertiary) inset;
             box-shadow: 0 0 0 1000px var(--bg-tertiary) inset;
-            transition: background-color 5000s ease-in-out 0s; /* Hack to keep background dark */
+            transition: background-color 5000s ease-in-out 0s;
         }
 
         /* Remove number spinners */
@@ -145,29 +144,6 @@
         select:focus {
             outline: none;
             border-color: var(--accent);
-        }
-
-        /* Select element styling with caret */
-        select {
-            background-image: var(--select-caret-light);
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 16px;
-            padding-right: 2.5rem;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            select {
-                background-image: var(--select-caret-dark);
-            }
-        }
-
-        [data-color-scheme="dark"] select {
-            background-image: var(--select-caret-dark);
-        }
-
-        [data-color-scheme="light"] select {
-            background-image: var(--select-caret-light);
         }
 
         .form-row {
@@ -943,16 +919,11 @@
                 padding: 1rem;
             }
             
-            /* Add Mobile Font Size Fix */
+            /* Mobile Font Size Fix */
             input,
             select,
             textarea {
                 font-size: 16px;
-            }
-
-            /* Reduce select padding on mobile to prevent overflow */
-            select {
-                padding-right: 2rem;
             }
 
             .form-row,
