@@ -3,7 +3,7 @@
           const nfcData = OpenSpool.generateData(formData);
           
           const filamentName = formData.brand || 'Generic';
-          const filename = `${filementName}_nfc`
+          const filename = `${filamentName}_nfc`
             .replace(/\s+/g, '_')
             .replace(/[^a-zA-Z0-9_]/g, '')
             .toLowerCase();
