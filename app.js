@@ -728,13 +728,14 @@ const app = {
     spectrumHue.addEventListener('touchstart', (e) => {
       this.dragState.isHueDragging = true;
       updateHue(e.touches[0]);
-    });
+    }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
       if (this.dragState.isHueDragging) {
+        e.preventDefault();
         updateHue(e.touches[0]);
       }
-    });
+    }, { passive: false });
 
     document.addEventListener('touchend', () => {
       this.dragState.isHueDragging = false;
@@ -784,13 +785,14 @@ const app = {
     spectrumSV.addEventListener('touchstart', (e) => {
       this.dragState.isSVDragging = true;
       updateSV(e.touches[0]);
-    });
+    }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
       if (this.dragState.isSVDragging) {
+        e.preventDefault();
         updateSV(e.touches[0]);
       }
-    });
+    }, { passive: false });
 
     document.addEventListener('touchend', () => {
       this.dragState.isSVDragging = false;
