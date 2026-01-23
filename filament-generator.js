@@ -5,6 +5,7 @@
 
 const filamentGenerator = {
   // Generic profiles - must exist in slicer
+  // These are the "Real" profiles that yield a valid (Green) status
   filamentProfiles: [
     'Generic ABS',
     'Generic ASA',
@@ -27,7 +28,7 @@ const filamentGenerator = {
   ],
 
   // Material inheritance mapping
-  // Maps each material to its closest Generic profile in the slicer
+  // Maps specific Material+Subtype combos to their closest Generic profile
   materialInheritance: {
     'PLA': 'Generic PLA',
     'ecoPLA': 'Generic PLA',
@@ -98,37 +99,61 @@ const filamentGenerator = {
 
   /**
    * Get inheritance value with validation
-   * Falls back to similar filament if exact match not found
-   * @param {string} material - Material name
+   * Logic:
+   * 1. Try Exact Match (Generic Material Subtype) in filamentProfiles -> Valid
+   * 2. Try Inheritance Map (Material Subtype) -> Similar (Warning)
+   * 3. Try Inheritance Map (Material) -> Similar (Warning)
+   * 4. Fallback -> Generic PETG (Warning)
+   * 
+   * @param {string} material - Material name (e.g. "PLA")
+   * @param {string} subtype - Subtype name (e.g. "High Speed", "Silk", "Basic")
    * @returns {object} {inherits: string, isValid: boolean, suggestion: string|null}
    */
-  getValidInherits(material) {
-    // Check if material exists in inheritance map
-    if (this.materialInheritance[material]) {
-      const preferredInherit = this.materialInheritance[material];
-      
-      // Check if preferred inherit exists in profiles
-      if (this.filamentProfiles.includes(preferredInherit)) {
-        return {
-          inherits: preferredInherit,
-          isValid: true,
-          suggestion: null
-        };
-      }
-      
-      // Fallback if profile not found (shouldn't happen)
+  getValidInherits(material, subtype) {
+    // Clean subtype (Basic implies empty)
+    const cleanSubtype = (subtype && subtype !== 'Basic') ? subtype.trim() : '';
+    
+    // 1. Construct potential Exact Profile Name
+    const exactProfileName = cleanSubtype 
+      ? `Generic ${material} ${cleanSubtype}`
+      : `Generic ${material}`;
+
+    // CHECK 1: Is this a Real Profile?
+    if (this.filamentProfiles.includes(exactProfileName)) {
       return {
-        inherits: 'Generic PETG',
-        isValid: false,
-        suggestion: `Profile "${preferredInherit}" not found. Using fallback: "Generic PETG".`
+        inherits: exactProfileName,
+        isValid: true, // Exact match = Green
+        suggestion: null
       };
     }
-    
-    // Unknown material - use fallback
+
+    // If not an exact match, we look for a "Similar" profile
+    let similarProfile = null;
+    let lookupKeyFull = cleanSubtype ? `${material} ${cleanSubtype}` : material;
+
+    // CHECK 2: Lookup via Material + Subtype
+    if (this.materialInheritance[lookupKeyFull]) {
+      similarProfile = this.materialInheritance[lookupKeyFull];
+    } 
+    // CHECK 3: Lookup via Material only
+    else if (this.materialInheritance[material]) {
+      similarProfile = this.materialInheritance[material];
+    }
+
+    // Validate the similar profile exists in our real profiles list
+    if (similarProfile && this.filamentProfiles.includes(similarProfile)) {
+      return {
+        inherits: similarProfile,
+        isValid: false, // Similar match = Yellow/Warning
+        suggestion: `Profile "${exactProfileName}" not found. Selected similar: "${similarProfile}".`
+      };
+    }
+
+    // CHECK 4: Fallback
     return {
       inherits: 'Generic PETG',
       isValid: false,
-      suggestion: `Material "${material}" not recognized. Using fallback: "Generic PETG".`
+      suggestion: `Profile not found for "${lookupKeyFull}". Using fallback: "Generic PETG".`
     };
   },
 
@@ -152,10 +177,13 @@ const filamentGenerator = {
     const avgBed = Math.round((minBed + maxBed) / 2);
 
     // Build filament name
-    const filamentName = `${brand} ${material}${type ? ' ' + type : ''}`;
+    // If type is "Basic", we don't append it to the name, unless you want "PLA Basic"
+    // Usually "Basic" is omitted in names.
+    const cleanType = (type && type !== 'Basic') ? type : '';
+    const filamentName = `${brand} ${material}${cleanType ? ' ' + cleanType : ''}`;
 
-    // Get validated inherits value
-    const inheritData = this.getValidInherits(material);
+    // Get validated inherits value using Material AND Type
+    const inheritData = this.getValidInherits(material, type);
 
     return {
       json: {
