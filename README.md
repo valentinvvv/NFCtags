@@ -5,10 +5,10 @@ A web-based application for creating and managing NFC tags for 3D printing filam
 ## Screenshots
 
 <div align="center">
-  <img src="1000057818.jpg" alt="Filament Tag Generator - Main Screen" width="300"/>
-  <img src="1000057812.jpg" alt="Color Picker Interface" width="300"/>
-  <img src="1000057814.jpg" alt="Material Type Selection" width="300"/>
-  <img src="1000057816.jpg" alt="Camera Color Capture" width="300"/>
+  <img src="scr/1000057818.jpg" alt="Filament Tag Generator - Main Screen" width="300"/>
+  <img src="scr/1000057812.jpg" alt="Color Picker Interface" width="300"/>
+  <img src="scr/1000057814.jpg" alt="Material Type Selection" width="300"/>
+  <img src="scr/1000057816.jpg" alt="Camera Color Capture" width="300"/>
 </div>
 
 ## Features
