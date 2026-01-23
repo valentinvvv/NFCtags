@@ -285,7 +285,7 @@ const app = {
     const filename = `${filamentName}`
       .replace(/\s+/g, '_')
       .replace(/[^a-zA-Z0-9_]/g, '')
-      .toLowerCase() + '.json';
+      .toLowerCase();
     
     filamentGenerator.downloadJSON(jsonData, filename);
     this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
