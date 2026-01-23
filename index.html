@@ -301,6 +301,49 @@
             overflow-y: auto;
         }
 
+        .json-preview {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .filament-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .filament-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .filament-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .filament-item:last-child {
+            border-bottom: none;
+        }
+
+        .filament-item.selected {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 3px solid var(--success);
+            padding-left: calc(0.75rem - 3px);
+        }
+
         .hidden {
             display: none !important;
         }
@@ -853,7 +896,38 @@
                 <button class="btn-success" onclick="app.setMode('create')" style="padding: 2rem;">
                     ✏️ Create New Tag
                 </button>
+                <button class="btn-success" onclick="app.setMode('downloadJson')" style="padding: 2rem;">
+                    💾 Download JSON
+                </button>
             </div>
+        </div>
+
+        <!-- Download JSON Section -->
+        <div id="downloadJsonSection" class="section hidden">
+            <h2 class="section-title">💾 Download Filament JSON</h2>
+            
+            <div class="form-group">
+                <label>Select Filament Profile</label>
+                <input type="text" id="filamentSearch" placeholder="Search filaments..." onkeyup="app.filterFilaments()">
+            </div>
+
+            <div class="filament-list" id="filamentList"></div>
+
+            <div class="form-group">
+                <label>JSON Preview</label>
+                <div class="json-preview" id="jsonPreview">Select a filament to preview JSON...</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="downloadBtn" onclick="app.downloadSelectedFilament()" disabled>
+                    📥 Download JSON
+                </button>
+                <button class="btn-secondary" onclick="app.setMode('menu')">
+                    ← Back to Menu
+                </button>
+            </div>
+
+            <div class="status-message" id="downloadStatus"></div>
         </div>
 
         <!-- Read Section -->
@@ -1158,6 +1232,7 @@
     </footer>
 
     <script src="openspool.js"></script>
+    <script src="filament-generator.js"></script>
     <script src="app.js"></script>
 </body>
 
