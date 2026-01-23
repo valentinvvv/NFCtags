@@ -174,9 +174,10 @@ const app = {
     'Nylon-Hydrophobic-CF': { minTemp: 250, maxTemp: 280, bedTempMin: 80, bedTempMax: 100 }
   },
 
-  // State for drag operations - CRITICAL: track which element is being dragged
+  // State for drag operations
   dragState: {
-    activeSource: null  // 'hue' or 'sv' - only one can be active at a time
+    isHueDragging: false,
+    isSVDragging: false
   },
 
   // ========================================================================
@@ -672,8 +673,9 @@ const app = {
     const modal = document.getElementById('colorSpectrumModal');
     modal.classList.remove('show');
     modal.classList.add('hidden');
-    // Clear any active drag state
-    this.dragState.activeSource = null;
+    // Stop any ongoing drag
+    this.dragState.isHueDragging = false;
+    this.dragState.isSVDragging = false;
   },
 
   confirmColorPicker() {
@@ -689,10 +691,8 @@ const app = {
     const spectrumSV = document.getElementById('spectrumSV');
 
     // ===== HUE SLIDER HANDLING =====
+    // Handle both click and drag for hue
     const updateHue = (e) => {
-      // Only process if hue is the active source
-      if (this.dragState.activeSource && this.dragState.activeSource !== 'hue') return;
-
       const rect = spectrumHue.getBoundingClientRect();
       const x = (e.clientX !== undefined ? e.clientX : e.pageX) - rect.left;
       const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
@@ -700,15 +700,15 @@ const app = {
       this.updateSpectrumFromHSV();
     };
 
-    // Mouse events for hue
+    // Mouse events for hue - only respond to clicks directly on the hue bar
     spectrumHue.addEventListener('mousedown', (e) => {
       e.stopPropagation();
-      this.dragState.activeSource = 'hue';
+      this.dragState.isHueDragging = true;
       updateHue(e);
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (this.dragState.activeSource === 'hue') {
+      if (this.dragState.isHueDragging) {
         const spectrumHue = document.getElementById('spectrumHue');
         if (spectrumHue) {
           updateHue(e);
@@ -717,7 +717,7 @@ const app = {
     });
 
     document.addEventListener('mouseup', () => {
-      this.dragState.activeSource = null;
+      this.dragState.isHueDragging = false;
     });
 
     // Click on hue bar
@@ -729,26 +729,23 @@ const app = {
     // Touch events for hue
     spectrumHue.addEventListener('touchstart', (e) => {
       e.stopPropagation();
-      this.dragState.activeSource = 'hue';
+      this.dragState.isHueDragging = true;
       updateHue(e.touches[0]);
     }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
-      if (this.dragState.activeSource === 'hue') {
+      if (this.dragState.isHueDragging) {
         e.preventDefault();
         updateHue(e.touches[0]);
       }
     }, { passive: false });
 
     document.addEventListener('touchend', () => {
-      this.dragState.activeSource = null;
+      this.dragState.isHueDragging = false;
     });
 
     // ===== SATURATION/VALUE (S/V) PICKER HANDLING =====
     const updateSV = (e) => {
-      // Only process if S/V is the active source
-      if (this.dragState.activeSource && this.dragState.activeSource !== 'sv') return;
-
       const rect = spectrumSV.getBoundingClientRect();
       const x = (e.clientX !== undefined ? e.clientX : e.pageX) - rect.left;
       const y = (e.clientY !== undefined ? e.clientY : e.pageY) - rect.top;
@@ -766,12 +763,12 @@ const app = {
     // Mouse events for S/V
     spectrumSV.addEventListener('mousedown', (e) => {
       e.stopPropagation();
-      this.dragState.activeSource = 'sv';
+      this.dragState.isSVDragging = true;
       updateSV(e);
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (this.dragState.activeSource === 'sv') {
+      if (this.dragState.isSVDragging) {
         const spectrumSV = document.getElementById('spectrumSV');
         if (spectrumSV) {
           updateSV(e);
@@ -780,7 +777,7 @@ const app = {
     });
 
     document.addEventListener('mouseup', () => {
-      this.dragState.activeSource = null;
+      this.dragState.isSVDragging = false;
     });
 
     // Click on S/V area
@@ -792,19 +789,19 @@ const app = {
     // Touch events for S/V
     spectrumSV.addEventListener('touchstart', (e) => {
       e.stopPropagation();
-      this.dragState.activeSource = 'sv';
+      this.dragState.isSVDragging = true;
       updateSV(e.touches[0]);
     }, { passive: false });
 
     document.addEventListener('touchmove', (e) => {
-      if (this.dragState.activeSource === 'sv') {
+      if (this.dragState.isSVDragging) {
         e.preventDefault();
         updateSV(e.touches[0]);
       }
     }, { passive: false });
 
     document.addEventListener('touchend', () => {
-      this.dragState.activeSource = null;
+      this.dragState.isSVDragging = false;
     });
 
     // RGB sliders
