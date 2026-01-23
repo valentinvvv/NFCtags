@@ -61,7 +61,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 2rem auto;
             padding: 0 1rem;
         }
@@ -119,9 +119,15 @@
 
         .form-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 2rem;
             align-items: start;
+        }
+
+        .form-content-left {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
         button {
@@ -300,6 +306,9 @@
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
         }
 
         .json-preview-label {
@@ -752,7 +761,28 @@
             background: var(--border);
         }
 
-        /* Desktop and Tablet */
+        /* Desktop: JSON on right side, sticky */
+        @media (min-width: 1024px) {
+            .json-preview-section {
+                position: sticky;
+                top: 2rem;
+                max-height: calc(100vh - 4rem);
+            }
+        }
+
+        /* Tablet and below: JSON below form */
+        @media (max-width: 1023px) {
+            .form-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .json-preview-section {
+                position: static;
+                max-height: none;
+            }
+        }
+
         @media (max-width: 900px) {
             .form-content {
                 grid-template-columns: 1fr;
@@ -787,6 +817,13 @@
 
             .color-palette {
                 grid-template-columns: repeat(6, 1fr);
+            }
+
+            .json-preview-section {
+                position: static;
+                margin-top: 2rem;
+                border-top: 2px solid var(--border);
+                padding-top: 1.5rem;
             }
 
             .color-spectrum-picker {
@@ -967,9 +1004,9 @@
         <div id="formSection" class="section hidden">
             <h2 class="section-title">✏️ <span id="formTitle">Create New Tag</span></h2>
             
-            <div class="form-content" style="display: flex; flex-direction: column;">
-                <!-- Left Side: Form Controls + Buttons -->
-                <div>
+            <div class="form-content">
+                <!-- Left Side: Form Controls -->
+                <div class="form-content-left">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="materialTypeInput">Material Type</label>
@@ -1219,29 +1256,22 @@
                     </div>
 
                     <div class="status-message" id="writeStatus"></div>
-
-                    <!-- Buttons Section - Now on Left -->
-                    <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <button class="btn-primary" id="writeNfcBtn" onclick="app.toggleWrite()">📝 Write to NFC</button>
-                        <button class="btn-secondary" id="downloadNfcBtn" onclick="app.downloadForNFC()" style="border: 1px solid var(--border);">💾 Download for NFC</button>
+                    
+                    <div class="button-group" style="margin-top: 1.5rem;">
+                        <button class="btn-secondary" onclick="app.downloadFile()">💾 Download for NFC</button>
+                        <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
                     </div>
                 </div>
 
-                <!-- Right Side: JSON Preview (goes below on mobile) -->
-                <div class="json-preview-section" style="margin-top: 0;">
+                <!-- Right Side: JSON Preview (sticky on desktop, bottom on mobile) -->
+                <div class="json-preview-section">
                     <div class="json-preview-label">📋 JSON Preview (OpenSpool Format)</div>
-                    <div id="validationAlert" class="hidden"></div>
-                    <div class="json-preview" id="jsonPreview">{}
-                    </div>
-                    <div class="button-row">
-                        <button class="btn-small-secondary" onclick="app.copyJsonToClipboard()">📋 Copy</button>
-                        <button class="btn-small-secondary" onclick="app.downloadJsonFile()">⬇️ Download</button>
-                    </div>
+                    <div class="json-preview" id="jsonPreview">{\n  "filament_settings_id": ["Generic PETG"],\n  "filament_vendor": ["Generic"],\n  "from": "User",\n  "inherits": "Generic PETG",\n  "is_custom_defined": "0",\n  "name": "Generic PETG",\n  "nozzle_temperature": ["235"],\n  "nozzle_temperature_initial_layer": ["230"],\n  "textured_plate_temp": ["75"],\n  "textured_plate_temp_initial_layer": ["74"],\n  "version": "2.2.42.2"\n}</div>
+                    <button class="copy-button" onclick="app.copyJsonToClipboard()">📋 Copy JSON</button>
+                    <button class="btn-primary" onclick="app.downloadJsonFile()" style="padding: 0.5rem; margin-bottom: 1rem;">💾 Download JSON</button>
+                    
+                    <button class="btn-secondary" id="writeBtn" onclick="app.toggleWrite()" style="padding: 0.75rem; margin-bottom: 0;">📝 Write to NFC</button>
                 </div>
-            </div>
-
-            <div class="button-group" style="margin-top: 1rem;">
-                <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
             </div>
         </div>
     </div>
