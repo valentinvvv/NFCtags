@@ -174,9 +174,6 @@ const app = {
     'Nylon-Hydrophobic-CF': { minTemp: 250, maxTemp: 280, bedTempMin: 80, bedTempMax: 100 }
   },
 
-  // State tracking
-  lastHue: null,  // Track last hue value to avoid redundant CSS updates
-
   // ========================================================================
   // INITIALIZATION
   // ========================================================================
@@ -690,7 +687,7 @@ const app = {
       const x = (e.clientX !== undefined ? e.clientX : e.pageX) - rect.left;
       const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       document.getElementById('spectrumHueSlider').style.left = percent + '%';
-      this.updateSpectrumFromHSV();
+      this.updateColorFromHue();
     };
 
     // Mouse events for hue
@@ -700,12 +697,11 @@ const app = {
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (spectrumHue.matches(':active') || document.mouseDownElement === spectrumHue) {
+      if (spectrumHue.matches(':active')) {
         updateHue(e);
       }
     });
 
-    // Click on hue bar
     spectrumHue.addEventListener('click', (e) => {
       e.stopPropagation();
       updateHue(e);
@@ -740,8 +736,7 @@ const app = {
       pointer.style.left = saturation + '%';
       pointer.style.top = (100 - value) + '%';
 
-      // ONLY update RGB and display - NO hue background color update
-      this.updateRGBFromHSV();
+      this.updateColorFromSV();
     };
 
     // Mouse events for S/V
@@ -751,12 +746,11 @@ const app = {
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (spectrumSV.matches(':active') || document.mouseDownElement === spectrumSV) {
+      if (spectrumSV.matches(':active')) {
         updateSV(e);
       }
     });
 
-    // Click on S/V area
     spectrumSV.addEventListener('click', (e) => {
       e.stopPropagation();
       updateSV(e);
@@ -785,7 +779,7 @@ const app = {
 
       slider.addEventListener('input', () => {
         text.value = slider.value;
-        this.updateSpectrumFromRGB();
+        this.updateColorFromRGB();
       });
 
       text.addEventListener('input', () => {
@@ -793,65 +787,83 @@ const app = {
         val = Math.max(0, Math.min(255, val));
         text.value = val;
         slider.value = val;
-        this.updateSpectrumFromRGB();
+        this.updateColorFromRGB();
       });
     });
   },
 
-  updateSpectrumFromHSV() {
+  updateColorFromHue() {
     const hueSlider = document.getElementById('spectrumHueSlider');
     const svPointer = document.getElementById('spectrumSVPointer');
 
     const hue = (parseFloat(hueSlider.style.left) || 0) * 3.6;
-    const saturation = parseFloat(svPointer.style.left) || 0;
+    const saturation = parseFloat(svPointer.style.left) || 100;
     const value = 100 - (parseFloat(svPointer.style.top) || 0);
 
     const rgb = this.hsvToRgb(hue, saturation, value);
 
+    // Update RGB inputs
     document.getElementById('spectrumR').value = rgb.r;
     document.getElementById('spectrumG').value = rgb.g;
     document.getElementById('spectrumB').value = rgb.b;
-
     document.getElementById('spectrumRText').value = rgb.r;
     document.getElementById('spectrumGText').value = rgb.g;
     document.getElementById('spectrumBText').value = rgb.b;
 
-    // Update hue background ONLY when hue slider moves
-    this.updateHueGradient(hue);
+    // Update S/V gradient background
+    const hueColor = `hsl(${hue}, 100%, 50%)`;
+    document.getElementById('spectrumSV').style.background = 
+      `linear-gradient(to right, white, ${hueColor}), linear-gradient(to top, black, transparent)`;
+
+    // Update display
     this.updateSpectrumDisplay(rgb.r, rgb.g, rgb.b);
   },
 
-  updateRGBFromHSV() {
+  updateColorFromSV() {
     const hueSlider = document.getElementById('spectrumHueSlider');
     const svPointer = document.getElementById('spectrumSVPointer');
 
     const hue = (parseFloat(hueSlider.style.left) || 0) * 3.6;
-    const saturation = parseFloat(svPointer.style.left) || 0;
+    const saturation = parseFloat(svPointer.style.left) || 100;
     const value = 100 - (parseFloat(svPointer.style.top) || 0);
 
     const rgb = this.hsvToRgb(hue, saturation, value);
 
+    // Update RGB inputs only, DON'T update gradient
     document.getElementById('spectrumR').value = rgb.r;
     document.getElementById('spectrumG').value = rgb.g;
     document.getElementById('spectrumB').value = rgb.b;
-
     document.getElementById('spectrumRText').value = rgb.r;
     document.getElementById('spectrumGText').value = rgb.g;
     document.getElementById('spectrumBText').value = rgb.b;
 
-    // Update display BUT NOT hue gradient
-    this.updateSpectrumDisplayOnly(rgb.r, rgb.g, rgb.b);
+    // Update display ONLY
+    this.updateSpectrumDisplayNoGradient(rgb.r, rgb.g, rgb.b);
   },
 
-  updateHueGradient(hue) {
-    // Only update CSS variable if hue actually changed
-    if (this.lastHue === hue) return;
-    
-    const hueRgb = this.hsvToRgb(hue, 100, 100);
-    const hueColor = `#${[hueRgb.r, hueRgb.g, hueRgb.b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
-    document.getElementById('spectrumSV').style.setProperty('--spectrum-hue-color', hueColor);
-    
-    this.lastHue = hue;
+  updateColorFromRGB() {
+    const r = parseInt(document.getElementById('spectrumR').value) || 0;
+    const g = parseInt(document.getElementById('spectrumG').value) || 0;
+    const b = parseInt(document.getElementById('spectrumB').value) || 0;
+
+    document.getElementById('spectrumRText').value = r;
+    document.getElementById('spectrumGText').value = g;
+    document.getElementById('spectrumBText').value = b;
+
+    const hsv = this.rgbToHsv(r, g, b);
+
+    // Update slider positions
+    const huePercent = (hsv.h / 360) * 100;
+    document.getElementById('spectrumHueSlider').style.left = huePercent + '%';
+    document.getElementById('spectrumSVPointer').style.left = hsv.s + '%';
+    document.getElementById('spectrumSVPointer').style.top = (100 - hsv.v) + '%';
+
+    // Update gradient AND display
+    const hueColor = `hsl(${hsv.h}, 100%, 50%)`;
+    document.getElementById('spectrumSV').style.background = 
+      `linear-gradient(to right, white, ${hueColor}), linear-gradient(to top, black, transparent)`;
+
+    this.updateSpectrumDisplay(r, g, b);
   },
 
   updateSpectrumDisplay(r, g, b) {
@@ -863,12 +875,9 @@ const app = {
     document.getElementById('spectrumPreviewBox').style.background = hex;
     document.getElementById('spectrumHexDisplay').textContent = hex;
     document.getElementById('spectrumRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
-
-    const hsv = this.rgbToHsv(r, g, b);
-    this.updateHueGradient(hsv.h);
   },
 
-  updateSpectrumDisplayOnly(r, g, b) {
+  updateSpectrumDisplayNoGradient(r, g, b) {
     const hex = '#' + [r, g, b].map(x => {
       const hex = x.toString(16);
       return hex.length === 1 ? '0' + hex : hex;
@@ -877,26 +886,10 @@ const app = {
     document.getElementById('spectrumPreviewBox').style.background = hex;
     document.getElementById('spectrumHexDisplay').textContent = hex;
     document.getElementById('spectrumRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
-    // Do NOT update hue gradient here
   },
 
   updateSpectrumFromRGB() {
-    const r = parseInt(document.getElementById('spectrumR').value) || 0;
-    const g = parseInt(document.getElementById('spectrumG').value) || 0;
-    const b = parseInt(document.getElementById('spectrumB').value) || 0;
-
-    document.getElementById('spectrumRText').value = r;
-    document.getElementById('spectrumGText').value = g;
-    document.getElementById('spectrumBText').value = b;
-
-    const hsv = this.rgbToHsv(r, g, b);
-
-    const huePercent = (hsv.h / 360) * 100;
-    document.getElementById('spectrumHueSlider').style.left = huePercent + '%';
-    document.getElementById('spectrumSVPointer').style.left = hsv.s + '%';
-    document.getElementById('spectrumSVPointer').style.top = (100 - hsv.v) + '%';
-
-    this.updateSpectrumDisplay(r, g, b);
+    this.updateColorFromRGB();
   },
 
   hexToRgb(hex) {
