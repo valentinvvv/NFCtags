@@ -323,21 +323,24 @@
             background: var(--accent-hover);
         }
 
-        .copy-button {
-            width: 100%;
-            padding: 0.5rem;
-            background: var(--accent);
-            color: white;
-            border: none;
+        .validation-alert {
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
             border-radius: 4px;
             font-size: 0.9rem;
-            cursor: pointer;
-            margin-bottom: 0.5rem;
-            transition: background 0.2s;
+            border-left: 4px solid;
         }
 
-        .copy-button:hover {
-            background: var(--accent-hover);
+        .validation-alert.valid {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .validation-alert.warning {
+            background: rgba(255, 152, 0, 0.1);
+            border-color: var(--warning);
+            color: var(--warning);
         }
 
         .hidden {
@@ -1190,28 +1193,15 @@
                 <!-- Right Side: JSON Preview -->
                 <div class="json-preview-section">
                     <div class="json-preview-label">📋 JSON Preview (OpenSpool Format)</div>
-                    <div class="json-preview" id="jsonPreview">{
-  "filament_settings_id": ["Generic PETG"],
-  "filament_vendor": ["Generic"],
-  "from": "User",
-  "inherits": "Generic PETG",
-  "is_custom_defined": "0",
-  "name": "Generic PETG",
-  "nozzle_temperature": ["235"],
-  "nozzle_temperature_initial_layer": ["230"],
-  "textured_plate_temp": ["75"],
-  "textured_plate_temp_initial_layer": ["74"],
-  "version": "2.2.42.2"
-}</div>
-                    <button class="copy-button" onclick="app.copyJsonToClipboard()">📋 Copy JSON</button>
-                    <button class="btn-primary" onclick="app.downloadJsonFile()" style="padding: 0.5rem; margin-bottom: 1rem;">💾 Download JSON</button>
-                    
-                    <button class="btn-secondary" id="writeBtn" onclick="app.toggleWrite()" style="padding: 0.75rem; margin-bottom: 0;">📝 Write to NFC</button>
+                    <div id="validationAlert" class="hidden"></div>
+                    <div class="json-preview" id="jsonPreview">{}
+                    </div>
+                    <button class="btn-primary" id="writeNfcBtn" onclick="app.toggleWrite()" style="padding: 0.5rem; margin-bottom: 0.5rem;">📝 Write to NFC</button>
+                    <button class="btn-primary" id="downloadNfcBtn" onclick="app.downloadForNFC()" style="padding: 0.5rem;">💾 Download for NFC</button>
                 </div>
             </div>
 
             <div class="button-group" style="margin-top: 1rem;">
-                <button class="btn-secondary" onclick="app.downloadNFCFile()">💾 Download for NFC</button>
                 <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
             </div>
         </div>
