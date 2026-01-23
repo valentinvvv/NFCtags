@@ -98,6 +98,7 @@ const nfcWriter = {
 const app = {
   nfcSupported: false,
   cameraCaptureColor: null,
+  selectedFilament: null,
 
   // Color palette for quick selection
   colors: [
@@ -228,6 +229,7 @@ const app = {
     document.getElementById('modeSelection').classList.add('hidden');
     document.getElementById('readSection').classList.add('hidden');
     document.getElementById('formSection').classList.add('hidden');
+    document.getElementById('downloadJsonSection').classList.add('hidden');
 
     if (mode === 'menu') {
       document.getElementById('modeSelection').classList.remove('hidden');
@@ -239,6 +241,9 @@ const app = {
       document.getElementById('formSection').classList.remove('hidden');
       const title = mode === 'create' ? 'Create New Tag' : 'Update Tag Data';
       document.getElementById('formTitle').textContent = title;
+    } else if (mode === 'downloadJson') {
+      document.getElementById('downloadJsonSection').classList.remove('hidden');
+      this.initFilamentDownload();
     }
   },
 
@@ -247,6 +252,86 @@ const app = {
     document.getElementById('decodedData').textContent = '';
     document.getElementById('decodedDataContainer').classList.add('hidden');
     this.showStatus('readStatus', '', '');
+  },
+
+  // ========================================================================
+  // FILAMENT JSON DOWNLOAD
+  // ========================================================================
+
+  initFilamentDownload() {
+    const filaments = filamentGenerator.getAvailableFilaments();
+    this.renderFilamentList(filaments);
+  },
+
+  renderFilamentList(filaments) {
+    const listContainer = document.getElementById('filamentList');
+    listContainer.innerHTML = '';
+
+    filaments.forEach(filament => {
+      const item = document.createElement('div');
+      item.className = 'filament-item';
+      item.textContent = filament;
+      item.onclick = () => this.selectFilament(filament, item);
+      listContainer.appendChild(item);
+    });
+  },
+
+  selectFilament(filament, element) {
+    // Remove previous selection
+    document.querySelectorAll('.filament-item').forEach(item => {
+      item.classList.remove('selected');
+    });
+
+    // Add selection to clicked item
+    element.classList.add('selected');
+    this.selectedFilament = filament;
+
+    // Update preview
+    const profile = filamentGenerator.getProfile(filament);
+    const json = filamentGenerator.generateJSON(
+      filament,
+      'FFFFFF',
+      profile.minNozzle,
+      profile.maxNozzle,
+      profile.minBed,
+      profile.maxBed
+    );
+
+    const preview = document.getElementById('jsonPreview');
+    preview.textContent = JSON.stringify(json, null, 2);
+
+    // Enable download button
+    document.getElementById('downloadBtn').disabled = false;
+  },
+
+  filterFilaments() {
+    const searchText = document.getElementById('filamentSearch').value.toLowerCase();
+    const filaments = filamentGenerator.getAvailableFilaments()
+      .filter(f => f.toLowerCase().includes(searchText));
+    
+    this.renderFilamentList(filaments);
+  },
+
+  downloadSelectedFilament() {
+    if (!this.selectedFilament) {
+      this.showStatus('downloadStatus', 'error', 'Please select a filament first');
+      return;
+    }
+
+    const profile = filamentGenerator.getProfile(this.selectedFilament);
+    const json = filamentGenerator.generateJSON(
+      this.selectedFilament,
+      'FFFFFF',
+      profile.minNozzle,
+      profile.maxNozzle,
+      profile.minBed,
+      profile.maxBed
+    );
+
+    const filename = `${this.selectedFilament}.json`;
+    filamentGenerator.downloadJSON(json, filename);
+    
+    this.showStatus('downloadStatus', 'success', `Downloaded ${filename}`);
   },
 
   // ========================================================================
