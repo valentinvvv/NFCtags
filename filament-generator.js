@@ -572,20 +572,55 @@ const filamentGenerator = {
   },
 
   /**
-   * Download a JSON file
+   * Download a JSON file - Robust implementation
    * @param {object} data - JSON data to download
-   * @param {string} filename - Name of the file to download
+   * @param {string} filename - Name of the file to download (should include .json extension)
    */
   downloadJsonFile(data, filename) {
-    const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      // Validate inputs
+      if (!data) {
+        console.error('downloadJsonFile: No data provided');
+        return false;
+      }
+      
+      if (!filename || typeof filename !== 'string') {
+        console.error('downloadJsonFile: Invalid filename');
+        return false;
+      }
+
+      // Ensure filename has .json extension
+      const cleanFilename = filename.endsWith('.json') ? filename : `${filename}.json`;
+      
+      // Convert data to JSON string with formatting
+      const jsonString = JSON.stringify(data, null, 2);
+      
+      // Create Blob with JSON content
+      const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+      
+      // Create temporary download link
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      // Configure link element
+      link.setAttribute('href', url);
+      link.setAttribute('download', cleanFilename);
+      link.style.visibility = 'hidden';
+      
+      // Append to document, trigger click, and remove
+      try {
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } finally {
+        // Clean up URL object reference
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('downloadJsonFile error:', error);
+      return false;
+    }
   }
 };
