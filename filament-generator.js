@@ -118,9 +118,6 @@ const filamentGenerator = {
       ? `Generic ${material} ${cleanSubtype}`
       : `Generic ${material}`;
 
-    // Debugging
-    console.log(`Checking profile: "${exactProfileName}"`);
-
     // CHECK 1: Is this a Real Profile? (Green)
     if (this.filamentProfiles.includes(exactProfileName)) {
       return {
@@ -187,9 +184,6 @@ const filamentGenerator = {
 
     // Get validated inherits value using Material AND Type
     const inheritData = this.getValidInherits(material, type);
-
-    // Debugging
-    console.log(`Validation result for ${filamentName}:`, inheritData);
 
     return {
       json: {
