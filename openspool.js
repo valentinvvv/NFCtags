@@ -13,17 +13,17 @@ const OpenSpool = {
     const data = {
       protocol: "openspool",
       version: "1.0",
-      type: formData.materialType,
-      color_hex: formData.colorHex.replace('#', '').toUpperCase()
+      type: formData.material || formData.materialType,
+      color_hex: (formData.colorHex || formData.color_hex || '#FFFFFF').replace('#', '').toUpperCase()
     };
 
     // Add optional fields only if provided
     if (formData.brand) data.brand = formData.brand;
-    if (formData.subtype) data.subtype = formData.subtype;
-    if (formData.minTemp) data.min_temp = parseInt(formData.minTemp);
-    if (formData.maxTemp) data.max_temp = parseInt(formData.maxTemp);
-    if (formData.bedTempMin) data.bed_min_temp = parseInt(formData.bedTempMin);
-    if (formData.bedTempMax) data.bed_max_temp = parseInt(formData.bedTempMax);
+    if (formData.subtype || formData.type) data.subtype = formData.subtype || formData.type;
+    if (formData.minNozzle || formData.minTemp) data.min_temp = parseInt(formData.minNozzle || formData.minTemp);
+    if (formData.maxNozzle || formData.maxTemp) data.max_temp = parseInt(formData.maxNozzle || formData.maxTemp);
+    if (formData.minBed || formData.bedTempMin) data.bed_min_temp = parseInt(formData.minBed || formData.bedTempMin);
+    if (formData.maxBed || formData.bedTempMax) data.bed_max_temp = parseInt(formData.maxBed || formData.bedTempMax);
 
     return data;
   },
@@ -102,27 +102,44 @@ const OpenSpool = {
 
   /**
    * Calculate the size needed for NDEF encoding
-   * @param {Object} formData - Form data object
+   * Accepts either form data or OpenSpool data object
+   * @param {Object} dataOrForm - Form data or OpenSpool data object
    * @returns {number} Size in bytes
    */
-  calculateRecordSize(formData) {
-    const data = this.generateData(formData);
-    const jsonStr = JSON.stringify(data);
-    const encoder = new TextEncoder();
-    const payload = encoder.encode(jsonStr);
+  calculateRecordSize(dataOrForm) {
+    // If input looks like form data (has minNozzle/minTemp), generate OpenSpool data first
+    let data = dataOrForm;
+    
+    if (dataOrForm.minNozzle !== undefined || dataOrForm.minTemp !== undefined) {
+      try {
+        data = this.generateData(dataOrForm);
+      } catch (e) {
+        console.error('Error generating data in calculateRecordSize:', e);
+        return 0;
+      }
+    }
 
-    // NDEF record structure:
-    // 1 byte: header
-    // 1 byte: type length (16 = "application/json")
-    // 1 byte: payload length (short form, <256 bytes)
-    // 16 bytes: media type "application/json"
-    // N bytes: payload
+    try {
+      const jsonStr = JSON.stringify(data);
+      const encoder = new TextEncoder();
+      const payload = encoder.encode(jsonStr);
 
-    const mediaType = "application/json";
-    const headerSize = 3; // header + type_length + payload_length (short form)
-    const mediaTypeLength = mediaType.length;
-    const payloadLength = payload.byteLength;
+      // NDEF record structure:
+      // 1 byte: header
+      // 1 byte: type length (16 = "application/json")
+      // 1 byte: payload length (short form, <256 bytes)
+      // 16 bytes: media type "application/json"
+      // N bytes: payload
 
-    return headerSize + mediaTypeLength + payloadLength;
+      const mediaType = "application/json";
+      const headerSize = 3; // header + type_length + payload_length (short form)
+      const mediaTypeLength = mediaType.length;
+      const payloadLength = payload.byteLength;
+
+      return headerSize + mediaTypeLength + payloadLength;
+    } catch (e) {
+      console.error('Error calculating record size:', e);
+      return 0;
+    }
   }
 };
