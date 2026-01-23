@@ -317,6 +317,20 @@ const app = {
           });
       },
       
+      downloadForNFC() {
+          const formData = this.getFormData();
+          const result = filamentGenerator.generateFromFormData(formData);
+          const jsonData = result.json;
+          
+          const filamentName = jsonData.filament_settings_id[0];
+          const filename = `${filamentName}`
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '')
+            .toLowerCase();
+          
+          filamentGenerator.downloadJSON(jsonData, filename);
+          this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
+        },
       // ========================================================================
       // NFC SCANNING
       // ========================================================================
