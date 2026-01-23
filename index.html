@@ -61,7 +61,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 2rem auto;
             padding: 0 1rem;
         }
@@ -115,6 +115,13 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
+        }
+
+        .form-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
         }
 
         button {
@@ -255,40 +262,6 @@
             box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
         }
 
-        .collapsible {
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            margin: 1.5rem 0 0.5rem;
-        }
-
-        .collapsible:hover {
-            background: #4d4d4d;
-        }
-
-        .collapsible-icon {
-            transition: transform 0.2s;
-        }
-
-        .collapsible.collapsed .collapsible-icon {
-            transform: rotate(-90deg);
-        }
-
-        .collapsible-content {
-            max-height: 2000px;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .collapsible-content.collapsed {
-            max-height: 0;
-        }
-
         .decoded-data {
             background: var(--bg-tertiary);
             padding: 1rem;
@@ -301,47 +274,70 @@
             overflow-y: auto;
         }
 
-        .json-preview {
+        .json-preview-section {
             background: var(--bg-tertiary);
             padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .json-preview-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .json-preview {
+            background: var(--bg-secondary);
+            padding: 0.75rem;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             white-space: pre-wrap;
             word-break: break-all;
-            max-height: 250px;
+            max-height: 400px;
             overflow-y: auto;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             border: 1px solid var(--border);
+            color: #4caf50;
         }
 
-        .filament-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
+        .json-preview::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .json-preview::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+
+        .json-preview::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .json-preview::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .copy-button {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
             border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-
-        .filament-item {
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
             cursor: pointer;
+            margin-bottom: 0.5rem;
             transition: background 0.2s;
         }
 
-        .filament-item:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .filament-item:last-child {
-            border-bottom: none;
-        }
-
-        .filament-item.selected {
-            background: rgba(76, 175, 80, 0.2);
-            border-left: 3px solid var(--success);
-            padding-left: calc(0.75rem - 3px);
+        .copy-button:hover {
+            background: var(--accent-hover);
         }
 
         .hidden {
@@ -735,6 +731,12 @@
         }
 
         /* Desktop and Tablet */
+        @media (max-width: 900px) {
+            .form-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 640px) {
             .container {
                 margin: 1rem auto;
@@ -896,38 +898,7 @@
                 <button class="btn-success" onclick="app.setMode('create')" style="padding: 2rem;">
                     ✏️ Create New Tag
                 </button>
-                <button class="btn-success" onclick="app.setMode('downloadJson')" style="padding: 2rem;">
-                    💾 Download JSON
-                </button>
             </div>
-        </div>
-
-        <!-- Download JSON Section -->
-        <div id="downloadJsonSection" class="section hidden">
-            <h2 class="section-title">💾 Download Filament JSON</h2>
-            
-            <div class="form-group">
-                <label>Select Filament Profile</label>
-                <input type="text" id="filamentSearch" placeholder="Search filaments..." onkeyup="app.filterFilaments()">
-            </div>
-
-            <div class="filament-list" id="filamentList"></div>
-
-            <div class="form-group">
-                <label>JSON Preview</label>
-                <div class="json-preview" id="jsonPreview">Select a filament to preview JSON...</div>
-            </div>
-
-            <div class="button-group">
-                <button class="btn-primary" id="downloadBtn" onclick="app.downloadSelectedFilament()" disabled>
-                    📥 Download JSON
-                </button>
-                <button class="btn-secondary" onclick="app.setMode('menu')">
-                    ← Back to Menu
-                </button>
-            </div>
-
-            <div class="status-message" id="downloadStatus"></div>
         </div>
 
         <!-- Read Section -->
@@ -962,269 +933,295 @@
         <!-- Form Section -->
         <div id="formSection" class="section hidden">
             <h2 class="section-title">✏️ <span id="formTitle">Create New Tag</span></h2>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="materialTypeInput">Material Type</label>
-                    <input type="text" id="materialTypeInput" list="materialList" placeholder="Select or type material"
-                        class="full-width" onchange="app.applyTemperaturePreset()">
-                    <datalist id="materialList">
-                        <option value="PLA">
-                        <option value="PETG">
-                        <option value="ABS">
-                        <option value="ASA">
-                        <option value="BVOH">
-                        <option value="easyPETG">
-                        <option value="ecoPLA">
-                        <option value="HIPS">
-                        <option value="PA">
-                        <option value="PA6">
-                        <option value="PA12">
-                        <option value="PC">
-                        <option value="PEBA">
-                        <option value="PEI">
-                        <option value="PEEK">
-                        <option value="PP">
-                        <option value="PCTG">
-                        <option value="PVA">
-                        <option value="TPE">
-                        <option value="TPU">
-                        <!-- CF Variants -->
-                        <option value="ABS-CF">
-                        <option value="ASA-CF">
-                        <option value="easyPETG-CF">
-                        <option value="ecoPLA-CF">
-                        <option value="ePAHT-CF">
-                        <option value="HIPS-CF">
-                        <option value="PA-CF">
-                        <option value="PA6-CF">
-                        <option value="PA12-CF">
-                        <option value="PEBA-CF">
-                        <option value="PEI-CF">
-                        <option value="PEEK-CF">
-                        <option value="PETG-CF">
-                        <option value="PC-CF">
-                        <option value="PP-CF">
-                        <option value="PCTG-CF">
-                        <option value="TPE-CF">
-                        <option value="TPU-CF">
-                        <!-- GF Variants -->
-                        <option value="ABS-GF">
-                        <option value="ASA-GF">
-                        <option value="easyPETG-GF">
-                        <option value="ecoPLA-GF">
-                        <option value="PA-GF">
-                        <option value="PA6-GF">
-                        <option value="PA12-GF">
-                        <option value="PEBA-GF">
-                        <option value="PEI-GF">
-                        <option value="PEEK-GF">
-                        <option value="PETG-GF">
-                        <option value="PC-GF">
-                        <option value="PP-GF">
-                        <option value="PCTG-GF">
-                        <option value="TPE-GF">
-                        <option value="TPU-GF">
-                        <!-- Special -->
-                        <option value="Carbon-Graphene">
-                        <option value="Metal-Brass">
-                        <option value="Metal-Bronze">
-                        <option value="Metal-Copper">
-                        <option value="Nylon-Hydrophobic-CF">
-                        <option value="Stone">
-                        <option value="Wood">
-                    </datalist>
-                </div>
-                <div class="form-group">
-                    <label for="subTypeInput">Type</label>
-                    <input type="text" id="subTypeInput" list="subTypeList" placeholder="Select or type subtype"
-                        class="full-width">
-                    <datalist id="subTypeList">
-                        <option value="Basic">
-                        <option value="Glitter">
-                        <option value="Matte Finish">
-                        <option value="Translucent">
-                        <option value="Transparent">
-                        <option value="Rainbow">
-                        <option value="Silk Finish">
-                    </datalist>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Color (Primary)</label>
-                <div class="color-palette" id="colorPalette"></div>
-                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                    <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}" style="flex: 1; min-width: 100px;">
-
-                    <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 40px; height: 40px; border-radius: 4px;
-                                border: 2px solid var(--border); background: #FFFFFF;
-                                cursor: pointer; touch-action: manipulation; flex-shrink: 0;">
+            
+            <div class="form-content">
+                <!-- Left Side: Form Controls -->
+                <div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="materialTypeInput">Material Type</label>
+                            <input type="text" id="materialTypeInput" list="materialList" placeholder="Select or type material"
+                                class="full-width" onchange="app.applyTemperaturePreset()">
+                            <datalist id="materialList">
+                                <option value="PLA">
+                                <option value="PETG">
+                                <option value="ABS">
+                                <option value="ASA">
+                                <option value="BVOH">
+                                <option value="easyPETG">
+                                <option value="ecoPLA">
+                                <option value="HIPS">
+                                <option value="PA">
+                                <option value="PA6">
+                                <option value="PA12">
+                                <option value="PC">
+                                <option value="PEBA">
+                                <option value="PEI">
+                                <option value="PEEK">
+                                <option value="PP">
+                                <option value="PCTG">
+                                <option value="PVA">
+                                <option value="TPE">
+                                <option value="TPU">
+                                <!-- CF Variants -->
+                                <option value="ABS-CF">
+                                <option value="ASA-CF">
+                                <option value="easyPETG-CF">
+                                <option value="ecoPLA-CF">
+                                <option value="ePAHT-CF">
+                                <option value="HIPS-CF">
+                                <option value="PA-CF">
+                                <option value="PA6-CF">
+                                <option value="PA12-CF">
+                                <option value="PEBA-CF">
+                                <option value="PEI-CF">
+                                <option value="PEEK-CF">
+                                <option value="PETG-CF">
+                                <option value="PC-CF">
+                                <option value="PP-CF">
+                                <option value="PCTG-CF">
+                                <option value="TPE-CF">
+                                <option value="TPU-CF">
+                                <!-- GF Variants -->
+                                <option value="ABS-GF">
+                                <option value="ASA-GF">
+                                <option value="easyPETG-GF">
+                                <option value="ecoPLA-GF">
+                                <option value="PA-GF">
+                                <option value="PA6-GF">
+                                <option value="PA12-GF">
+                                <option value="PEBA-GF">
+                                <option value="PEI-GF">
+                                <option value="PEEK-GF">
+                                <option value="PETG-GF">
+                                <option value="PC-GF">
+                                <option value="PP-GF">
+                                <option value="PCTG-GF">
+                                <option value="TPE-GF">
+                                <option value="TPU-GF">
+                                <!-- Special -->
+                                <option value="Carbon-Graphene">
+                                <option value="Metal-Brass">
+                                <option value="Metal-Bronze">
+                                <option value="Metal-Copper">
+                                <option value="Nylon-Hydrophobic-CF">
+                                <option value="Stone">
+                                <option value="Wood">
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="subTypeInput">Type</label>
+                            <input type="text" id="subTypeInput" list="subTypeList" placeholder="Select or type subtype"
+                                class="full-width">
+                            <datalist id="subTypeList">
+                                <option value="Basic">
+                                <option value="Glitter">
+                                <option value="Matte Finish">
+                                <option value="Translucent">
+                                <option value="Transparent">
+                                <option value="Rainbow">
+                                <option value="Silk Finish">
+                            </datalist>
+                        </div>
                     </div>
 
-                    <button class="btn-primary" onclick="app.toggleCameraPicker()" style="padding: 0.6rem 1rem; width: auto; flex-shrink: 0; margin-top: 0;">
-                        📷
-                    </button>
+                    <div class="form-group">
+                        <label>Color (Primary)</label>
+                        <div class="color-palette" id="colorPalette"></div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}" style="flex: 1; min-width: 100px;">
 
-                    <!-- Color Spectrum Picker Modal -->
-                    <div id="colorSpectrumModal" class="color-spectrum-modal hidden"
-                        onclick="if(event.target === this) app.closeColorPicker()">
-                        <div class="color-spectrum-picker">
-                            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color
-                            </h3>
+                            <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 40px; height: 40px; border-radius: 4px;
+                                        border: 2px solid var(--border); background: #FFFFFF;
+                                        cursor: pointer; touch-action: manipulation; flex-shrink: 0;">
+                            </div>
 
-                            <!-- Saturation & Brightness Picker (square) -->
-                            <div class="spectrum-wrapper">
-                                <div class="spectrum-sv-container">
-                                    <div class="spectrum-sv" id="spectrumSV">
-                                        <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                            <button class="btn-primary" onclick="app.toggleCameraPicker()" style="padding: 0.6rem 1rem; width: auto; flex-shrink: 0; margin-top: 0;">
+                                📷
+                            </button>
+
+                            <!-- Color Spectrum Picker Modal -->
+                            <div id="colorSpectrumModal" class="color-spectrum-modal hidden"
+                                onclick="if(event.target === this) app.closeColorPicker()">
+                                <div class="color-spectrum-picker">
+                                    <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color
+                                    </h3>
+
+                                    <!-- Saturation & Brightness Picker (square) -->
+                                    <div class="spectrum-wrapper">
+                                        <div class="spectrum-sv-container">
+                                            <div class="spectrum-sv" id="spectrumSV">
+                                                <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hue Bar (horizontal, below) -->
+                                        <div class="spectrum-hue" id="spectrumHue">
+                                            <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- RGB Sliders -->
+                                    <div class="spectrum-sliders">
+                                        <div class="slider-group">
+                                            <label>R:</label>
+                                            <input type="range" id="spectrumR" min="0" max="255" value="255">
+                                            <input type="text" id="spectrumRText" maxlength="3" value="255">
+                                        </div>
+                                        <div class="slider-group">
+                                            <label>G:</label>
+                                            <input type="range" id="spectrumG" min="0" max="255" value="255">
+                                            <input type="text" id="spectrumGText" maxlength="3" value="255">
+                                        </div>
+                                        <div class="slider-group">
+                                            <label>B:</label>
+                                            <input type="range" id="spectrumB" min="0" max="255" value="255">
+                                            <input type="text" id="spectrumBText" maxlength="3" value="255">
+                                        </div>
+                                    </div>
+
+                                    <!-- Preview -->
+                                    <div class="spectrum-preview">
+                                        <div class="spectrum-preview-box" id="spectrumPreviewBox"></div>
+                                        <div class="spectrum-preview-text">
+                                            <div>HEX: <strong id="spectrumHexDisplay">#FFFFFF</strong></div>
+                                            <div>RGB: <strong id="spectrumRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="spectrum-buttons">
+                                        <button class="btn-ok" onclick="app.confirmColorPicker()">✓ OK</button>
+                                        <button class="btn-cancel" onclick="app.closeColorPicker()">✕ Cancel</button>
                                     </div>
                                 </div>
-
-                                <!-- Hue Bar (horizontal, below) -->
-                                <div class="spectrum-hue" id="spectrumHue">
-                                    <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
-                                </div>
                             </div>
 
-                            <!-- RGB Sliders -->
-                            <div class="spectrum-sliders">
-                                <div class="slider-group">
-                                    <label>R:</label>
-                                    <input type="range" id="spectrumR" min="0" max="255" value="255">
-                                    <input type="text" id="spectrumRText" maxlength="3" value="255">
-                                </div>
-                                <div class="slider-group">
-                                    <label>G:</label>
-                                    <input type="range" id="spectrumG" min="0" max="255" value="255">
-                                    <input type="text" id="spectrumGText" maxlength="3" value="255">
-                                </div>
-                                <div class="slider-group">
-                                    <label>B:</label>
-                                    <input type="range" id="spectrumB" min="0" max="255" value="255">
-                                    <input type="text" id="spectrumBText" maxlength="3" value="255">
-                                </div>
-                            </div>
+                            <!-- Camera Color Picker Modal -->
+                            <div id="cameraModal" class="camera-modal hidden"
+                                onclick="if(event.target === this) app.closeCameraPicker()">
+                                <div class="camera-container">
+                                    <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-primary);">Capture Color from Camera</h3>
+                                    
+                                    <div class="camera-stream">
+                                        <video id="cameraFeed" autoplay playsinline></video>
+                                        <div class="camera-crosshair"></div>
+                                    </div>
 
-                            <!-- Preview -->
-                            <div class="spectrum-preview">
-                                <div class="spectrum-preview-box" id="spectrumPreviewBox"></div>
-                                <div class="spectrum-preview-text">
-                                    <div>HEX: <strong id="spectrumHexDisplay">#FFFFFF</strong></div>
-                                    <div>RGB: <strong id="spectrumRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                    <div class="camera-preview">
+                                        <div class="camera-color-box" id="cameraColorBox"></div>
+                                        <div class="camera-color-text">
+                                            <div>HEX: <strong id="cameraHexDisplay">#FFFFFF</strong></div>
+                                            <div>RGB: <strong id="cameraRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="camera-buttons">
+                                        <button class="btn-use" onclick="app.useCameraColor()">✓ Use Color</button>
+                                        <button class="btn-close" onclick="app.closeCameraPicker()">✕ Close</button>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                        <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                            Enter hex color (e.g., FF5733, #FF5733) or use spectrum picker
+                        </small>
+                    </div>
 
-                            <!-- Buttons -->
-                            <div class="spectrum-buttons">
-                                <button class="btn-ok" onclick="app.confirmColorPicker()">✓ OK</button>
-                                <button class="btn-cancel" onclick="app.closeColorPicker()">✕ Cancel</button>
-                            </div>
+                    <div class="form-group">
+                        <label for="brandInput">Brand Name</label>
+                        <input type="text" id="brandInput" list="brandList" placeholder="Select or type a brand"
+                            class="full-width">
+                        <datalist id="brandList">
+                            <option value="Generic">
+                            <option value="Bambu Lab">
+                            <option value="eSun">
+                            <option value="Polymaker">
+                            <option value="Hatchbox">
+                            <option value="Overture">
+                            <option value="SUNLU">
+                            <option value="Prusament">
+                            <option value="Jayo">
+                            <!-- The specific brands you requested -->
+                            <option value="3DJake">
+                            <option value="Anycubic">
+                            <option value="AzureFilm">
+                            <option value="ColorFabb">
+                            <option value="Elegoo">
+                            <option value="Extrudr">
+                            <option value="Fiberlogy">
+                            <option value="Fillamentum">
+                            <option value="FormFutura">
+                            <option value="Geeetech">
+                            <option value="Kimya">
+                            <option value="Spectrum">
+                        </datalist>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Nozzle Temp (°C)</label>
+                            <input type="number" id="minTemp" placeholder="220" value="220" onchange="app.updateJsonPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Nozzle Temp (°C)</label>
+                            <input type="number" id="maxTemp" placeholder="240" value="240" onchange="app.updateJsonPreview()">
                         </div>
                     </div>
 
-                    <!-- Camera Color Picker Modal -->
-                    <div id="cameraModal" class="camera-modal hidden"
-                        onclick="if(event.target === this) app.closeCameraPicker()">
-                        <div class="camera-container">
-                            <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-primary);">Capture Color from Camera</h3>
-                            
-                            <div class="camera-stream">
-                                <video id="cameraFeed" autoplay playsinline></video>
-                                <div class="camera-crosshair"></div>
-                            </div>
-
-                            <div class="camera-preview">
-                                <div class="camera-color-box" id="cameraColorBox"></div>
-                                <div class="camera-color-text">
-                                    <div>HEX: <strong id="cameraHexDisplay">#FFFFFF</strong></div>
-                                    <div>RGB: <strong id="cameraRgbDisplay">rgb(255, 255, 255)</strong></div>
-                                </div>
-                            </div>
-
-                            <div class="camera-buttons">
-                                <button class="btn-use" onclick="app.useCameraColor()">✓ Use Color</button>
-                                <button class="btn-close" onclick="app.closeCameraPicker()">✕ Close</button>
-                            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Bed Temp (°C)</label>
+                            <input type="number" id="bedTempMin" placeholder="50" onchange="app.updateJsonPreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Bed Temp (°C)</label>
+                            <input type="number" id="bedTempMax" placeholder="60" onchange="app.updateJsonPreview()">
                         </div>
                     </div>
-                </div>
-                <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
-                    Enter hex color (e.g., FF5733, #FF5733) or use spectrum picker
-                </small>
-            </div>
 
-            <div class="form-group">
-                <label for="brandInput">Brand Name</label>
-                <input type="text" id="brandInput" list="brandList" placeholder="Select or type a brand"
-                    class="full-width">
-                <datalist id="brandList">
-                    <option value="Generic">
-                    <option value="Bambu Lab">
-                    <option value="eSun">
-                    <option value="Polymaker">
-                    <option value="Hatchbox">
-                    <option value="Overture">
-                    <option value="SUNLU">
-                    <option value="Prusament">
-                    <option value="Jayo">
-                    <!-- The specific brands you requested -->
-                    <option value="3DJake">
-                    <option value="Anycubic">
-                    <option value="AzureFilm">
-                    <option value="ColorFabb">
-                    <option value="Elegoo">
-                    <option value="Extrudr">
-                    <option value="Fiberlogy">
-                    <option value="Fillamentum">
-                    <option value="FormFutura">
-                    <option value="Geeetech">
-                    <option value="Kimya">
-                    <option value="Spectrum">
-                </datalist>
-            </div>
+                    <div class="info-box" id="recordSizeInfo"
+                        style="margin-top: 1rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success);">
+                        📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>
+                    </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Min Nozzle Temp (°C)</label>
-                    <input type="number" id="minTemp" placeholder="220" value="220">
+                    <div class="status-message" id="writeStatus"></div>
                 </div>
-                <div class="form-group">
-                    <label>Max Nozzle Temp (°C)</label>
-                    <input type="number" id="maxTemp" placeholder="240" value="240">
+
+                <!-- Right Side: JSON Preview -->
+                <div class="json-preview-section">
+                    <div class="json-preview-label">📋 JSON Preview (OpenSpool Format)</div>
+                    <div class="json-preview" id="jsonPreview">{
+  "filament_settings_id": ["Generic PETG"],
+  "filament_vendor": ["Generic"],
+  "from": "User",
+  "inherits": "Generic PETG",
+  "is_custom_defined": "0",
+  "name": "Generic PETG",
+  "nozzle_temperature": ["235"],
+  "nozzle_temperature_initial_layer": ["230"],
+  "textured_plate_temp": ["75"],
+  "textured_plate_temp_initial_layer": ["74"],
+  "version": "2.2.42.2"
+}</div>
+                    <button class="copy-button" onclick="app.copyJsonToClipboard()">📋 Copy JSON</button>
+                    <button class="btn-primary" onclick="app.downloadJsonFile()" style="padding: 0.5rem; margin-bottom: 1rem;">💾 Download JSON</button>
+                    
+                    <button class="btn-secondary" id="writeBtn" onclick="app.toggleWrite()" style="padding: 0.75rem; margin-bottom: 0;">📝 Write to NFC</button>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Min Bed Temp (°C)</label>
-                    <input type="number" id="bedTempMin" placeholder="50">
-                </div>
-                <div class="form-group">
-                    <label>Max Bed Temp (°C)</label>
-                    <input type="number" id="bedTempMax" placeholder="60">
-                </div>
+            <div class="button-group" style="margin-top: 1rem;">
+                <button class="btn-secondary" onclick="app.downloadFile()">💾 Download for NFC</button>
+                <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
             </div>
-
-            <div class="button-group">
-                <button class="btn-secondary" onclick="app.downloadFile()">💾 Download File</button>
-                <button id="writeBtn" class="btn-success" onclick="app.toggleWrite()">📝 Write to NFC</button>
-            </div>
-
-            <div class="info-box" id="recordSizeInfo"
-                style="margin-top: 0.5rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success);">
-                📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>
-            </div>
-
-            <div class="status-message" id="writeStatus"></div>
-
-            <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
         </div>
     </div>
 
     <footer>
         <p>
             Filament Tag Generator - Supporting
-            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a> &
+            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a>
         </p>
         <p style="margin-top: 0.5rem; font-size: 0.85rem;">
             © 2025 <a href="https://github.com/paxx12/" target="_blank">paxx12</a> - Open Source Project
