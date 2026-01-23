@@ -105,7 +105,7 @@ const OpenSpool = {
    * @param {Object} data - OpenSpool data object
    * @param {string} filename - Output filename
    */
-  downloadJSON(data, filename = 'openspool.json') {
+  downloadNFCJSON(data, filename = 'openspool.json') {
     const jsonStr = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

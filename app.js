@@ -282,7 +282,7 @@ const app = {
     const jsonData = filamentGenerator.generateFromFormData(formData);
     
     const filamentName = jsonData.filament_settings_id[0];
-    const filename = `${filamentName}.json`
+    const filename = `${filamentName}`
       .replace(/\s+/g, '_')
       .replace(/[^a-zA-Z0-9_]/g, '')
       .toLowerCase() + '.json';
@@ -566,10 +566,10 @@ const app = {
     this.showStatus('writeStatus', '', '');
   },
 
-  downloadFile() {
+  downloadNFCFile() {
     const formData = this.getFormData();
     const data = OpenSpool.generateData(formData);
-    OpenSpool.downloadJSON(data);
+    OpenSpool.downloadNFCJSON(data);
     this.showStatus('writeStatus', 'success', 'File downloaded');
   },
 
