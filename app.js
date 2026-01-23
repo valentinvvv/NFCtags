@@ -4,34 +4,73 @@
  */
 
 // ============================================================================
+// SMALL UTILITIES
+// ============================================================================
+
+function debounce(fn, delayMs = 200) {
+      let t;
+      return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), delayMs);
+      };
+}
+
+function sanitizeFilename(name) {
+      return String(name || '')
+            .trim()
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '')
+            .toLowerCase();
+}
+
+function parseIntOrDefault(value, fallback) {
+      const n = parseInt(value, 10);
+      return Number.isFinite(n) ? n : fallback;
+}
+
+// ============================================================================
 // NFC READER MODULE
 // ============================================================================
 
 const nfcReader = {
       controller: null,
       reader: null,
+      _onRead: null,
+      _onError: null,
+      _listenersAttached: false,
 
       async start(onRead, onError) {
             if (this.controller) return; // Already scanning
 
+            this._onRead = onRead;
+            this._onError = onError;
+
             try {
                   this.controller = new AbortController();
-                  this.reader = new NDEFReader();
+
+                  // Reuse the same reader instance (and avoid re-registering listeners)
+                  if (!this.reader) {
+                        this.reader = new NDEFReader();
+                  }
+
+                  if (!this._listenersAttached) {
+                        this.reader.addEventListener('reading', ({ message, serialNumber }) => {
+                              if (this._onRead) this._onRead(message, serialNumber);
+                        });
+
+                        this.reader.addEventListener('readingerror', () => {
+                              if (this._onError) this._onError('Error reading NFC tag');
+                        });
+
+                        this._listenersAttached = true;
+                  }
+
                   await this.reader.scan({ signal: this.controller.signal });
-
-                  this.reader.addEventListener('reading', ({ message, serialNumber }) => {
-                        onRead(message, serialNumber);
-                  });
-
-                  this.reader.addEventListener('readingerror', () => {
-                        onError('Error reading NFC tag');
-                  });
             } catch (error) {
                   if (error.name !== 'AbortError') {
-                        onError(error.message);
+                        if (this._onError) this._onError(error.message);
                   }
                   this.controller = null;
-                  this.reader = null;
             }
       },
 
@@ -39,7 +78,6 @@ const nfcReader = {
             if (this.controller) {
                   this.controller.abort();
                   this.controller = null;
-                  this.reader = null;
             }
       },
 
@@ -54,20 +92,25 @@ const nfcReader = {
 
 const nfcWriter = {
       controller: null,
+      writer: null,
 
       async write(records, onProgress) {
             if (this.controller) {
                   throw new Error('Write operation already in progress');
             }
 
-            const writer = new NDEFReader();
+            // Reuse writer instance
+            if (!this.writer) {
+                  this.writer = new NDEFReader();
+            }
+
             this.controller = new AbortController();
 
             try {
                   if (onProgress) onProgress('reading');
                   if (onProgress) onProgress('writing');
 
-                  await writer.write({ records, signal: this.controller.signal });
+                  await this.writer.write({ records, signal: this.controller.signal });
 
                   if (onProgress) onProgress('success');
                   this.controller = null;
@@ -99,7 +142,8 @@ const app = {
       nfcSupported: false,
       cameraCaptureColor: null,
       cameraStream: null,
-      colorSamplingInterval: null,
+      colorSamplingRafId: null,
+      debouncedUpdateJsonPreview: null,
 
       // Color palette for quick selection
       colors: [
@@ -188,6 +232,9 @@ const app = {
       // ========================================================================
 
       init() {
+            // Debounce JSON preview updates triggered by typing
+            this.debouncedUpdateJsonPreview = debounce(() => this.updateJsonPreview(), 200);
+
             this.checkNFC();
             this.initColorPalette();
             this.initEventListeners();
@@ -297,10 +344,7 @@ const app = {
             const jsonData = result.json;
 
             const filamentName = jsonData.filament_settings_id[0];
-            const filename = `${filamentName}`
-                  .replace(/\s+/g, '_')
-                  .replace(/[^a-zA-Z0-9_]/g, '')
-                  .toLowerCase();
+            const filename = sanitizeFilename(filamentName);
 
             filamentGenerator.downloadJsonFile(jsonData, filename);
             this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
@@ -323,10 +367,7 @@ const app = {
             const nfcData = OpenSpool.generateData(formData);
 
             const baseName = `${formData.brand || 'Generic'} ${formData.material || 'PETG'} ${formData.type || 'Basic'}`.trim();
-            const filename = `${baseName} nfc`
-                  .replace(/\s+/g, '_')
-                  .replace(/[^a-zA-Z0-9_]/g, '')
-                  .toLowerCase();
+            const filename = sanitizeFilename(`${baseName} nfc`);
 
             filamentGenerator.downloadJsonFile(nfcData, filename);
             this.showStatus('writeStatus', 'success', `Downloaded ${filename}.json`);
@@ -432,6 +473,14 @@ const app = {
                   });
             }
 
+            const doUpdate = () => {
+                  if (this.debouncedUpdateJsonPreview) {
+                        this.debouncedUpdateJsonPreview();
+                  } else {
+                        this.updateJsonPreview();
+                  }
+            };
+
             const colorHex = document.getElementById('colorHex');
             if (colorHex) {
                   colorHex.addEventListener('input', (e) => {
@@ -441,7 +490,7 @@ const app = {
                         v = '#' + v.slice(1).replace(/[^0-9A-F]/g, '').slice(0, 6);
                         e.target.value = v;
                         this.updateColor(v);
-                        this.updateJsonPreview();
+                        doUpdate();
                   });
             }
 
@@ -449,8 +498,8 @@ const app = {
             updateTriggers.forEach(id => {
                   const element = document.getElementById(id);
                   if (element) {
-                        element.addEventListener('change', () => this.updateJsonPreview());
-                        element.addEventListener('input', () => this.updateJsonPreview());
+                        element.addEventListener('change', doUpdate);
+                        element.addEventListener('input', doUpdate);
                   }
             });
       },
@@ -507,21 +556,44 @@ const app = {
             this.updateJsonPreview();
       },
 
-      getFormData() {
+      // Normalized, typed form reading (single source of truth)
+      getNormalizedFormData() {
+            const material = document.getElementById('materialTypeInput').value || 'PETG';
+            const type = document.getElementById('subTypeInput').value || 'Basic';
+            const brand = document.getElementById('brandInput').value || 'Generic';
+
+            const colorRaw = document.getElementById('colorHex').value || '#FFFFFF';
+            const colorHex = this.normalizeHexColor(colorRaw) || '#FFFFFF';
+
+            const nozzleMin = parseIntOrDefault(document.getElementById('minTemp').value, 230);
+            const nozzleMax = parseIntOrDefault(document.getElementById('maxTemp').value, 250);
+            const bedMin = parseIntOrDefault(document.getElementById('bedTempMin').value, 70);
+            const bedMax = parseIntOrDefault(document.getElementById('bedTempMax').value, 80);
+
             return {
-                  // Orca/Bambu generator expects these names
-                  material: document.getElementById('materialTypeInput').value || 'PETG',
-                  type: document.getElementById('subTypeInput').value || 'Basic',
-                  brand: document.getElementById('brandInput').value || 'Generic',
+                  material,
+                  type,
+                  brand,
+                  colorHex,
+                  temps: {
+                        nozzle: { min: nozzleMin, max: nozzleMax },
+                        bed: { min: bedMin, max: bedMax }
+                  }
+            };
+      },
 
-                  // OpenSpool generator uses this for color_hex
-                  colorHex: document.getElementById('colorHex').value || '#FFFFFF',
-
-                  // Temperatures
-                  minNozzle: parseInt(document.getElementById('minTemp').value) || 230,
-                  maxNozzle: parseInt(document.getElementById('maxTemp').value) || 250,
-                  minBed: parseInt(document.getElementById('bedTempMin').value) || 70,
-                  maxBed: parseInt(document.getElementById('bedTempMax').value) || 80
+      // Backwards-compatible shape for generators (Orca + OpenSpool)
+      getFormData() {
+            const n = this.getNormalizedFormData();
+            return {
+                  material: n.material,
+                  type: n.type,
+                  brand: n.brand,
+                  colorHex: n.colorHex,
+                  minNozzle: n.temps.nozzle.min,
+                  maxNozzle: n.temps.nozzle.max,
+                  minBed: n.temps.bed.min,
+                  maxBed: n.temps.bed.max
             };
       },
 
@@ -1101,10 +1173,10 @@ const app = {
             const modal = document.getElementById('cameraModal');
             const video = document.getElementById('cameraFeed');
 
-            // Stop color sampling
-            if (this.colorSamplingInterval) {
-                  clearInterval(this.colorSamplingInterval);
-                  this.colorSamplingInterval = null;
+            // Stop rAF sampling loop
+            if (this.colorSamplingRafId) {
+                  cancelAnimationFrame(this.colorSamplingRafId);
+                  this.colorSamplingRafId = null;
             }
 
             // Stop camera stream
@@ -1123,21 +1195,25 @@ const app = {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
-            // Clear any existing interval
-            if (this.colorSamplingInterval) {
-                  clearInterval(this.colorSamplingInterval);
+            // Cancel any existing sampling loop
+            if (this.colorSamplingRafId) {
+                  cancelAnimationFrame(this.colorSamplingRafId);
+                  this.colorSamplingRafId = null;
             }
 
-            this.colorSamplingInterval = setInterval(() => {
+            const sample = () => {
                   if (!video.srcObject) {
-                        clearInterval(this.colorSamplingInterval);
+                        this.colorSamplingRafId = null;
                         return;
                   }
 
                   canvas.width = video.videoWidth;
                   canvas.height = video.videoHeight;
 
-                  if (canvas.width === 0 || canvas.height === 0) return;
+                  if (canvas.width === 0 || canvas.height === 0) {
+                        this.colorSamplingRafId = requestAnimationFrame(sample);
+                        return;
+                  }
 
                   // Draw video frame
                   ctx.drawImage(video, 0, 0);
@@ -1163,7 +1239,10 @@ const app = {
                   document.getElementById('cameraRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
 
                   this.cameraCaptureColor = { hex, r, g, b };
-            }, 100); // Update every 100ms
+                  this.colorSamplingRafId = requestAnimationFrame(sample);
+            };
+
+            this.colorSamplingRafId = requestAnimationFrame(sample);
       },
 
       useCameraColor() {
