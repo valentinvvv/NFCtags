@@ -174,6 +174,12 @@ const app = {
     'Nylon-Hydrophobic-CF': { minTemp: 250, maxTemp: 280, bedTempMin: 80, bedTempMax: 100 }
   },
 
+  // State for drag operations
+  dragState: {
+    isHueDragging: false,
+    isSVDragging: false
+  },
+
   // ========================================================================
   // INITIALIZATION
   // ========================================================================
@@ -667,6 +673,9 @@ const app = {
     const modal = document.getElementById('colorSpectrumModal');
     modal.classList.remove('show');
     modal.classList.add('hidden');
+    // Stop any ongoing drag
+    this.dragState.isHueDragging = false;
+    this.dragState.isSVDragging = false;
   },
 
   confirmColorPicker() {
@@ -681,32 +690,110 @@ const app = {
     const spectrumHue = document.getElementById('spectrumHue');
     const spectrumSV = document.getElementById('spectrumSV');
 
-    // Hue slider
+    // ===== HUE SLIDER HANDLING =====
+    // Handle both click and drag for hue
+    const updateHue = (e) => {
+      const rect = spectrumHue.getBoundingClientRect();
+      const x = (e.clientX !== undefined ? e.clientX : e.pageX) - rect.left;
+      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      document.getElementById('spectrumHueSlider').style.left = percent + '%';
+      this.updateSpectrumFromHSV();
+    };
+
+    // Mouse events for hue
+    spectrumHue.addEventListener('mousedown', (e) => {
+      this.dragState.isHueDragging = true;
+      updateHue(e);
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (this.dragState.isHueDragging) {
+        const spectrumHue = document.getElementById('spectrumHue');
+        if (spectrumHue) {
+          updateHue(e);
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      this.dragState.isHueDragging = false;
+    });
+
+    // Click on hue bar
     spectrumHue.addEventListener('click', (e) => {
-      const rect = spectrumHue.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      document.getElementById('spectrumHueSlider').style.left = percent + '%';
-      this.updateSpectrumFromHSV();
+      updateHue(e);
     });
 
-    // Touch support for hue
+    // Touch events for hue
     spectrumHue.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      const rect = spectrumHue.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      document.getElementById('spectrumHueSlider').style.left = percent + '%';
+      this.dragState.isHueDragging = true;
+      updateHue(e.touches[0]);
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (this.dragState.isHueDragging) {
+        updateHue(e.touches[0]);
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      this.dragState.isHueDragging = false;
+    });
+
+    // ===== SATURATION/VALUE (S/V) PICKER HANDLING =====
+    const updateSV = (e) => {
+      const rect = spectrumSV.getBoundingClientRect();
+      const x = (e.clientX !== undefined ? e.clientX : e.pageX) - rect.left;
+      const y = (e.clientY !== undefined ? e.clientY : e.pageY) - rect.top;
+
+      const saturation = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      const value = Math.max(0, Math.min(100, 100 - (y / rect.height) * 100));
+
+      const pointer = document.getElementById('spectrumSVPointer');
+      pointer.style.left = saturation + '%';
+      pointer.style.top = (100 - value) + '%';
+
       this.updateSpectrumFromHSV();
+    };
+
+    // Mouse events for S/V
+    spectrumSV.addEventListener('mousedown', (e) => {
+      this.dragState.isSVDragging = true;
+      updateSV(e);
     });
 
-    // SV picker
+    document.addEventListener('mousemove', (e) => {
+      if (this.dragState.isSVDragging) {
+        const spectrumSV = document.getElementById('spectrumSV');
+        if (spectrumSV) {
+          updateSV(e);
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      this.dragState.isSVDragging = false;
+    });
+
+    // Click on S/V area
     spectrumSV.addEventListener('click', (e) => {
-      this.handleSVPick(e);
+      updateSV(e);
     });
 
+    // Touch events for S/V
     spectrumSV.addEventListener('touchstart', (e) => {
-      this.handleSVPick(e.touches[0]);
+      this.dragState.isSVDragging = true;
+      updateSV(e.touches[0]);
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (this.dragState.isSVDragging) {
+        updateSV(e.touches[0]);
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      this.dragState.isSVDragging = false;
     });
 
     // RGB sliders
@@ -727,22 +814,6 @@ const app = {
         this.updateSpectrumFromRGB();
       });
     });
-  },
-
-  handleSVPick(e) {
-    const spectrumSV = document.getElementById('spectrumSV');
-    const rect = spectrumSV.getBoundingClientRect();
-    const x = (e.clientX || e.pageX) - rect.left;
-    const y = (e.clientY || e.pageY) - rect.top;
-
-    const saturation = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    const value = Math.max(0, Math.min(100, 100 - (y / rect.height) * 100));
-
-    const pointer = document.getElementById('spectrumSVPointer');
-    pointer.style.left = saturation + '%';
-    pointer.style.top = (100 - value) + '%';
-
-    this.updateSpectrumFromHSV();
   },
 
   updateSpectrumFromHSV() {
