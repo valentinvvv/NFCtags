@@ -576,7 +576,7 @@ const filamentGenerator = {
    * @param {object} data - JSON data to download
    * @param {string} filename - Name of the file to download
    */
-  downloadJSON(data, filename) {
+  downloadJsonFile(data, filename) {
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
