@@ -99,6 +99,8 @@ const app = {
   nfcSupported: false,
   cameraCaptureColor: null,
   selectedFilament: null,
+  cameraStream: null,
+  colorSamplingInterval: null,
 
   // Color palette for quick selection
   colors: [
@@ -229,7 +231,6 @@ const app = {
     document.getElementById('modeSelection').classList.add('hidden');
     document.getElementById('readSection').classList.add('hidden');
     document.getElementById('formSection').classList.add('hidden');
-    document.getElementById('downloadJsonSection').classList.add('hidden');
 
     if (mode === 'menu') {
       document.getElementById('modeSelection').classList.remove('hidden');
@@ -241,9 +242,7 @@ const app = {
       document.getElementById('formSection').classList.remove('hidden');
       const title = mode === 'create' ? 'Create New Tag' : 'Update Tag Data';
       document.getElementById('formTitle').textContent = title;
-    } else if (mode === 'downloadJson') {
-      document.getElementById('downloadJsonSection').classList.remove('hidden');
-      this.initFilamentDownload();
+      this.updateJsonPreview();
     }
   },
 
@@ -255,83 +254,41 @@ const app = {
   },
 
   // ========================================================================
-  // FILAMENT JSON DOWNLOAD
+  // JSON PREVIEW AND DOWNLOAD
   // ========================================================================
 
-  initFilamentDownload() {
-    const filaments = filamentGenerator.getAvailableFilaments();
-    this.renderFilamentList(filaments);
+  updateJsonPreview() {
+    const formData = this.getFormData();
+    const jsonData = filamentGenerator.generateFromFormData(formData);
+    const jsonString = JSON.stringify(jsonData, null, 2);
+    
+    document.getElementById('jsonPreview').textContent = jsonString;
+    this.updateRecordSize();
   },
 
-  renderFilamentList(filaments) {
-    const listContainer = document.getElementById('filamentList');
-    listContainer.innerHTML = '';
-
-    filaments.forEach(filament => {
-      const item = document.createElement('div');
-      item.className = 'filament-item';
-      item.textContent = filament;
-      item.onclick = () => this.selectFilament(filament, item);
-      listContainer.appendChild(item);
+  copyJsonToClipboard() {
+    const jsonPreview = document.getElementById('jsonPreview');
+    const text = jsonPreview.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+      this.showStatus('writeStatus', 'success', 'JSON copied to clipboard');
+    }).catch(() => {
+      this.showStatus('writeStatus', 'error', 'Failed to copy JSON');
     });
   },
 
-  selectFilament(filament, element) {
-    // Remove previous selection
-    document.querySelectorAll('.filament-item').forEach(item => {
-      item.classList.remove('selected');
-    });
-
-    // Add selection to clicked item
-    element.classList.add('selected');
-    this.selectedFilament = filament;
-
-    // Update preview
-    const profile = filamentGenerator.getProfile(filament);
-    const json = filamentGenerator.generateJSON(
-      filament,
-      'FFFFFF',
-      profile.minNozzle,
-      profile.maxNozzle,
-      profile.minBed,
-      profile.maxBed
-    );
-
-    const preview = document.getElementById('jsonPreview');
-    preview.textContent = JSON.stringify(json, null, 2);
-
-    // Enable download button
-    document.getElementById('downloadBtn').disabled = false;
-  },
-
-  filterFilaments() {
-    const searchText = document.getElementById('filamentSearch').value.toLowerCase();
-    const filaments = filamentGenerator.getAvailableFilaments()
-      .filter(f => f.toLowerCase().includes(searchText));
+  downloadJsonFile() {
+    const formData = this.getFormData();
+    const jsonData = filamentGenerator.generateFromFormData(formData);
     
-    this.renderFilamentList(filaments);
-  },
-
-  downloadSelectedFilament() {
-    if (!this.selectedFilament) {
-      this.showStatus('downloadStatus', 'error', 'Please select a filament first');
-      return;
-    }
-
-    const profile = filamentGenerator.getProfile(this.selectedFilament);
-    const json = filamentGenerator.generateJSON(
-      this.selectedFilament,
-      'FFFFFF',
-      profile.minNozzle,
-      profile.maxNozzle,
-      profile.minBed,
-      profile.maxBed
-    );
-
-    const filename = `${this.selectedFilament}.json`;
-    filamentGenerator.downloadJSON(json, filename);
+    const filamentName = jsonData.filament_settings_id[0];
+    const filename = `${filamentName}.json`
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      .toLowerCase() + '.json';
     
-    this.showStatus('downloadStatus', 'success', `Downloaded ${filename}`);
+    filamentGenerator.downloadJSON(jsonData, filename);
+    this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
   },
 
   // ========================================================================
@@ -443,23 +400,16 @@ const app = {
         v = '#' + v.slice(1).replace(/[^0-9A-F]/g, '').slice(0, 6);
         e.target.value = v;
         this.updateColor(v);
-        this.updateRecordSize();
+        this.updateJsonPreview();
       });
     }
 
-    const updateTriggers = ['brand', 'subTypeInput', 'materialTypeInput'];
+    const updateTriggers = ['brand', 'subTypeInput', 'materialTypeInput', 'minTemp', 'maxTemp', 'bedTempMin', 'bedTempMax'];
     updateTriggers.forEach(id => {
       const element = document.getElementById(id);
       if (element) {
-        element.addEventListener('change', () => this.updateRecordSize());
-      }
-    });
-
-    const inputFields = ['minTemp', 'maxTemp', 'bedTempMin', 'bedTempMax'];
-    inputFields.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.addEventListener('input', () => this.updateRecordSize());
+        element.addEventListener('change', () => this.updateJsonPreview());
+        element.addEventListener('input', () => this.updateJsonPreview());
       }
     });
   },
@@ -514,21 +464,18 @@ const app = {
     document.getElementById('bedTempMin').value = data.bedTempMin || '';
     document.getElementById('bedTempMax').value = data.bedTempMax || '';
 
-    this.updateRecordSize();
+    this.updateJsonPreview();
   },
 
   getFormData() {
-    // OLD: Logic handling 'custom' selects
-    // NEW: Direct access
     return {
-      materialType: document.getElementById('materialTypeInput').value || 'PLA',
-      colorHex: this.normalizeHexColor(document.getElementById('colorHex').value.replace('#', '') || 'FFFFFF'),
+      material: document.getElementById('materialTypeInput').value || 'PETG',
+      type: document.getElementById('subTypeInput').value || 'Basic',
       brand: document.getElementById('brandInput').value || 'Generic',
-      subtype: document.getElementById('subTypeInput').value || 'Basic',
-      minTemp: parseInt(document.getElementById('minTemp').value) || 190,
-      maxTemp: parseInt(document.getElementById('maxTemp').value) || 220,
-      bedTempMin: parseInt(document.getElementById('bedTempMin').value) || 50,
-      bedTempMax: parseInt(document.getElementById('bedTempMax').value) || 60
+      minNozzle: parseInt(document.getElementById('minTemp').value) || 230,
+      maxNozzle: parseInt(document.getElementById('maxTemp').value) || 250,
+      minBed: parseInt(document.getElementById('bedTempMin').value) || 70,
+      maxBed: parseInt(document.getElementById('bedTempMax').value) || 80
     };
   },
 
@@ -542,7 +489,7 @@ const app = {
       document.getElementById('bedTempMin').value = preset.bedTempMin;
       document.getElementById('bedTempMax').value = preset.bedTempMax;
 
-      this.updateRecordSize();
+      this.updateJsonPreview();
     }
   },
 
@@ -679,7 +626,7 @@ const app = {
       swatch.onclick = () => {
         input.value = color.toUpperCase();
         this.updateColor(color);
-        this.updateRecordSize();
+        this.updateJsonPreview();
       };
       palette.appendChild(swatch);
     });
@@ -765,7 +712,7 @@ const app = {
     const hex = document.getElementById('spectrumHexDisplay').textContent;
     document.getElementById('colorHex').value = hex;
     this.updateColor(hex);
-    this.updateRecordSize();
+    this.updateJsonPreview();
     this.closeColorPicker();
   },
 
@@ -1170,7 +1117,7 @@ const app = {
     const hex = this.cameraCaptureColor.hex;
     document.getElementById('colorHex').value = hex;
     this.updateColor(hex);
-    this.updateRecordSize();
+    this.updateJsonPreview();
     this.closeCameraPicker();
   },
 
