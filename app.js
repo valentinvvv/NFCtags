@@ -314,6 +314,31 @@ const app = {
             this.showStatus('writeStatus', 'success', 'NFC data downloaded');
       },
 
+      copyJsonToClipboard() {
+          const jsonPreview = document.getElementById('jsonPreview');
+          const text = jsonPreview.textContent;
+          
+          navigator.clipboard.writeText(text).then(() => {
+            this.showStatus('writeStatus', 'success', 'JSON copied to clipboard');
+          }).catch(() => {
+            this.showStatus('writeStatus', 'error', 'Failed to copy JSON');
+          });
+      },
+      
+      downloadJsonFile() {
+          const formData = this.getFormData();
+          const jsonData = filamentGenerator.generateFromFormData(formData);
+          
+          const filamentName = jsonData.filament_settings_id[0];
+          const filename = `${filamentName}`
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '')
+            .toLowerCase();
+          
+          filamentGenerator.downloadJSON(jsonData, filename);
+          this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
+      },
+      
       // ========================================================================
       // NFC SCANNING
       // ========================================================================
