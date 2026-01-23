@@ -208,7 +208,7 @@ const app = {
         this.updateNFCStatus(true, 'NFC available');
       }
       document.getElementById('scanBtn').disabled = false;
-      document.getElementById('writeBtn').disabled = false;
+      document.getElementById('writeNfcBtn').disabled = false;
     } else {
       this.updateNFCStatus(false, 'NFC not supported on this device');
     }
@@ -256,36 +256,52 @@ const app = {
   // ========================================================================
   // JSON PREVIEW AND DOWNLOAD
   // ========================================================================
-
   updateJsonPreview() {
     const formData = this.getFormData();
-    const jsonData = filamentGenerator.generateFromFormData(formData);
-    const jsonString = JSON.stringify(jsonData, null, 2);
+    const result = filamentGenerator.generateFromFormData(formData);
+    const jsonData = result.json;
+    const validation = result.validation;
     
+    // Display validation alert if needed
+    this.displayValidationAlert(validation);
+    
+    const jsonString = JSON.stringify(jsonData, null, 2);
     document.getElementById('jsonPreview').textContent = jsonString;
     this.updateRecordSize();
   },
-
-  copyJsonToClipboard() {
-    const jsonPreview = document.getElementById('jsonPreview');
-    const text = jsonPreview.textContent;
+  
+  displayValidationAlert(validation) {
+    const alertDiv = document.getElementById('validationAlert');
     
-    navigator.clipboard.writeText(text).then(() => {
-      this.showStatus('writeStatus', 'success', 'JSON copied to clipboard');
-    }).catch(() => {
-      this.showStatus('writeStatus', 'error', 'Failed to copy JSON');
-    });
+    if (!validation.isValid && validation.suggestion) {
+      alertDiv.className = 'validation-alert warning';
+      alertDiv.innerHTML = '⚠️ ' + validation.suggestion;
+      alertDiv.classList.remove('hidden');
+    } else if (validation.isValid) {
+      alertDiv.className = 'validation-alert valid';
+      alertDiv.innerHTML = '✓ Filament profile found and validated';
+      alertDiv.classList.remove('hidden');
+      // Auto-hide success messages after 3 seconds
+      setTimeout(() => {
+        if (alertDiv.classList.contains('valid')) {
+          alertDiv.classList.add('hidden');
+        }
+      }, 3000);
+    } else {
+      alertDiv.classList.add('hidden');
+    }
   },
 
-  downloadJsonFile() {
+  downloadForNFC() {
     const formData = this.getFormData();
-    const jsonData = filamentGenerator.generateFromFormData(formData);
+    const result = filamentGenerator.generateFromFormData(formData);
+    const jsonData = result.json;
     
     const filamentName = jsonData.filament_settings_id[0];
-    const filename = `${filamentName}.json`
+    const filename = `${filamentName}`
       .replace(/\s+/g, '_')
       .replace(/[^a-zA-Z0-9_]/g, '')
-      .toLowerCase() + '.json';
+      .toLowerCase();
     
     filamentGenerator.downloadJSON(jsonData, filename);
     this.showStatus('writeStatus', 'success', `Downloaded ${filename}`);
@@ -404,7 +420,7 @@ const app = {
       });
     }
 
-    const updateTriggers = ['brand', 'subTypeInput', 'materialTypeInput', 'minTemp', 'maxTemp', 'bedTempMin', 'bedTempMax'];
+    const updateTriggers = ['brandInput', 'subTypeInput', 'materialTypeInput', 'minTemp', 'maxTemp', 'bedTempMin', 'bedTempMax'];
     updateTriggers.forEach(id => {
       const element = document.getElementById(id);
       if (element) {
@@ -503,9 +519,10 @@ const app = {
       return;
     }
 
-    const writeBtn = document.getElementById('writeBtn');
+    const writeBtn = document.getElementById('writeNfcBtn');
     const originalText = writeBtn.textContent;
     const formData = this.getFormData();
+    const result = filamentGenerator.generateFromFormData(formData);
     const data = OpenSpool.generateData(formData);
     const records = OpenSpool.createNDEFRecord(data);
 
@@ -516,7 +533,7 @@ const app = {
     } catch (error) {
       writeBtn.textContent = originalText;
       writeBtn.classList.remove('btn-secondary');
-      writeBtn.classList.add('btn-success');
+      writeBtn.classList.add('btn-primary');
       this.showStatus('writeStatus', 'error', error.message);
     }
   },
@@ -526,7 +543,7 @@ const app = {
 
     if (status === 'reading') {
       writeBtn.textContent = '❌ Cancel';
-      writeBtn.classList.remove('btn-success');
+      writeBtn.classList.remove('btn-primary');
       writeBtn.classList.add('btn-secondary');
       this.showStatus('writeStatus', 'warning', 'Hold device near NFC tag...');
     } else if (status === 'writing') {
@@ -536,12 +553,12 @@ const app = {
     } else if (status === 'success') {
       writeBtn.textContent = originalText;
       writeBtn.classList.remove('btn-secondary');
-      writeBtn.classList.add('btn-success');
+      writeBtn.classList.add('btn-primary');
       this.showStatus('writeStatus', 'success', 'Tag written successfully');
     } else if (status === 'error') {
       writeBtn.textContent = originalText;
       writeBtn.classList.remove('btn-secondary');
-      writeBtn.classList.add('btn-success');
+      writeBtn.classList.add('btn-primary');
       const errorMsg = error.name === 'NotAllowedError' ? 'NFC permission denied' :
         error.name === 'AbortError' ? 'Write cancelled' :
           error.message;
@@ -559,17 +576,18 @@ const app = {
 
   cancelWrite() {
     nfcWriter.cancel();
-    const writeBtn = document.getElementById('writeBtn');
+    const writeBtn = document.getElementById('writeNfcBtn');
     writeBtn.textContent = '📝 Write to NFC';
     writeBtn.classList.remove('btn-secondary');
-    writeBtn.classList.add('btn-success');
+    writeBtn.classList.add('btn-primary');
     this.showStatus('writeStatus', '', '');
   },
 
-  downloadFile() {
+  downloadForNFC() {
     const formData = this.getFormData();
+    const result = filamentGenerator.generateFromFormData(formData);
     const data = OpenSpool.generateData(formData);
-    OpenSpool.downloadJSON(data);
+    OpenSpool.downloadNFCJSON(data);
     this.showStatus('writeStatus', 'success', 'File downloaded');
   },
 

@@ -175,11 +175,30 @@
             background: #45a049;
         }
 
+        .btn-small-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            margin: 0.25rem;
+        }
+
+        .btn-small-secondary:hover {
+            background: #4d4d4d;
+        }
+
         .button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-top: 1rem;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .nfc-status {
@@ -332,21 +351,24 @@
             background: var(--accent-hover);
         }
 
-        .copy-button {
-            width: 100%;
-            padding: 0.5rem;
-            background: var(--accent);
-            color: white;
-            border: none;
+        .validation-alert {
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
             border-radius: 4px;
             font-size: 0.9rem;
-            cursor: pointer;
-            margin-bottom: 0.5rem;
-            transition: background 0.2s;
+            border-left: 4px solid;
         }
 
-        .copy-button:hover {
-            background: var(--accent-hover);
+        .validation-alert.valid {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .validation-alert.warning {
+            background: rgba(255, 152, 0, 0.1);
+            border-color: var(--warning);
+            color: var(--warning);
         }
 
         .hidden {
@@ -767,6 +789,18 @@
             }
         }
 
+        /* Mobile - JSON preview goes below buttons */
+        @media (max-width: 768px) {
+            .form-content {
+                grid-template-columns: 1fr;
+            }
+
+            .json-preview-section {
+                order: 2;
+                margin-top: 2rem;
+            }
+        }
+
         @media (max-width: 640px) {
             .container {
                 margin: 1rem auto;
@@ -919,8 +953,7 @@
     <header>
         <h1>🧵 Filament Tag Generator</h1>
         <p>
-            <a href="https://openspool.io/rfic.html" target="_blank">OpenSpool</a> &
-            <a href="https://specs.openprinttag.org/" target="_blank">OpenPrintTag</a> formats
+            <a href="https://openspool.io/rfic.html" target="_blank">OpenSpool</a> format
         </p>
     </header>
 
@@ -964,7 +997,7 @@
                 <div class="decoded-data" id="decodedData"></div>
             </div>
 
-            <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
+            <button class="btn-secondary" onclick="app.setMode('menu')" style="margin-top: 1rem;">← Back to Menu</button>
         </div>
 
         <!-- Form Section -->
