@@ -936,6 +936,24 @@
                 font-size: 0.95rem;
             }
 
+            /* Mobile-specific: Reduce color picker elements */
+            #colorPreview {
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            /* Reduce camera button size on mobile */
+            .form-group button.btn-primary {
+                padding: 0.5rem 0.75rem !important;
+                min-width: 44px;
+            }
+
+            /* Ensure hex input doesn't overflow */
+            #colorHex {
+                min-width: 80px !important;
+                max-width: calc(100% - 100px);
+            }
+
             .color-palette {
                 grid-template-columns: repeat(6, 1fr);
             }
