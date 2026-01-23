@@ -97,6 +97,7 @@ const nfcWriter = {
 
 const app = {
   nfcSupported: false,
+  cameraCaptureColor: null,
 
   // Color palette for quick selection
   colors: [
@@ -969,6 +970,125 @@ const app = {
       b: Math.round((b + m) * 255)
     };
   },
+
+  // ========================================================================
+  // CAMERA COLOR PICKER
+  // ========================================================================
+
+  toggleCameraPicker() {
+    const modal = document.getElementById('cameraModal');
+    if (modal.classList.contains('hidden')) {
+      this.openCameraPicker();
+    } else {
+      this.closeCameraPicker();
+    }
+  },
+
+  async openCameraPicker() {
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraFeed');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+
+      video.srcObject = stream;
+      this.cameraStream = stream;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('show');
+
+      // Start color sampling
+      this.startColorSampling();
+    } catch (error) {
+      this.showStatus('writeStatus', 'error', 'Camera access denied: ' + error.message);
+    }
+  },
+
+  closeCameraPicker() {
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraFeed');
+
+    // Stop color sampling
+    if (this.colorSamplingInterval) {
+      clearInterval(this.colorSamplingInterval);
+      this.colorSamplingInterval = null;
+    }
+
+    // Stop camera stream
+    if (this.cameraStream) {
+      this.cameraStream.getTracks().forEach(track => track.stop());
+      this.cameraStream = null;
+    }
+
+    video.srcObject = null;
+    modal.classList.remove('show');
+    modal.classList.add('hidden');
+  },
+
+  startColorSampling() {
+    const video = document.getElementById('cameraFeed');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Clear any existing interval
+    if (this.colorSamplingInterval) {
+      clearInterval(this.colorSamplingInterval);
+    }
+
+    this.colorSamplingInterval = setInterval(() => {
+      if (!video.srcObject) {
+        clearInterval(this.colorSamplingInterval);
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      if (canvas.width === 0 || canvas.height === 0) return;
+
+      // Draw video frame
+      ctx.drawImage(video, 0, 0);
+
+      // Sample center pixel (crosshair area)
+      const centerX = Math.floor(canvas.width / 2);
+      const centerY = Math.floor(canvas.height / 2);
+      const imageData = ctx.getImageData(centerX, centerY, 1, 1);
+      const data = imageData.data;
+
+      const r = data[0];
+      const g = data[1];
+      const b = data[2];
+
+      const hex = '#' + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('').toUpperCase();
+
+      // Update display
+      document.getElementById('cameraColorBox').style.background = hex;
+      document.getElementById('cameraHexDisplay').textContent = hex;
+      document.getElementById('cameraRgbDisplay').textContent = `rgb(${r}, ${g}, ${b})`;
+
+      this.cameraCaptureColor = { hex, r, g, b };
+    }, 100); // Update every 100ms
+  },
+
+  useCameraColor() {
+    if (!this.cameraCaptureColor) return;
+
+    const hex = this.cameraCaptureColor.hex;
+    document.getElementById('colorHex').value = hex;
+    this.updateColor(hex);
+    this.updateRecordSize();
+    this.closeCameraPicker();
+  },
+
   // ========================================================================
   // UTILITIES
   // ========================================================================
