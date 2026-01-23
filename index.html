@@ -111,7 +111,7 @@
             border-radius: 4px;
             color: var(--text-primary);
             font-size: 1rem;
-            
+
             -webkit-appearance: none;
             appearance: none;
             line-height: 1.2;
@@ -134,7 +134,7 @@
             -webkit-appearance: none;
             margin: 0;
         }
-        
+
         input[type="number"] {
             -moz-appearance: textfield;
             appearance: textfield;
@@ -295,10 +295,6 @@
             margin-top: 1rem;
         }
 
-        .button-group.full-width button {
-            width: 100%;
-        }
-
         .button-row {
             display: flex;
             gap: 0.5rem;
@@ -345,13 +341,25 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         @keyframes pulse-success {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
         }
 
         .status-message {
@@ -368,6 +376,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -410,8 +419,13 @@
         }
 
         @keyframes highlightFlash {
-            0% { background: rgba(255, 107, 53, 0.3); }
-            100% { background: rgba(255, 107, 53, 0.1); }
+            0% {
+                background: rgba(255, 107, 53, 0.3);
+            }
+
+            100% {
+                background: rgba(255, 107, 53, 0.1);
+            }
         }
 
         .operation-indicator.show {
@@ -432,8 +446,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .info-box {
@@ -614,10 +633,6 @@
             touch-action: none;
             max-height: 90vh;
             overflow-y: auto;
-        }
-
-        .spectrum-container {
-            margin-bottom: 1.5rem;
         }
 
         .spectrum-hue {
@@ -906,10 +921,6 @@
 
         /* Mobile - JSON preview goes below buttons */
         @media (max-width: 768px) {
-            .form-content {
-                grid-template-columns: 1fr;
-            }
-
             .json-preview-section {
                 order: 2;
                 margin-top: 2rem;
@@ -926,7 +937,7 @@
             .section {
                 padding: 1rem;
             }
-            
+
             /* Mobile Font Size Fix */
             input,
             select,
@@ -1140,7 +1151,7 @@
         <!-- Form Section -->
         <div id="formSection" class="section hidden">
             <h2 class="section-title">✏️ <span id="formTitle">Create New Tag</span></h2>
-            
+
             <div class="form-content">
                 <!-- Left Side: Form Controls + Buttons -->
                 <div>
@@ -1309,7 +1320,7 @@
                                 onclick="if(event.target === this) app.closeCameraPicker()">
                                 <div class="camera-container">
                                     <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-primary);">Capture Color from Camera</h3>
-                                    
+
                                     <div class="camera-stream">
                                         <video id="cameraFeed" autoplay playsinline></video>
                                         <div class="camera-crosshair"></div>
