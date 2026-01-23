@@ -2,22 +2,37 @@
 
 A web-based application for creating and managing NFC tags for 3D printing filament spools.
 
-## Screenshots
-
 <div align="center">
-  <img src="scr/1000057818.jpg" alt="Filament Tag Generator - Main Screen" width="300"/>
-  <img src="scr/1000057812.jpg" alt="Color Picker Interface" width="300"/>
-  <img src="scr/1000057814.jpg" alt="Material Type Selection" width="300"/>
-  <img src="scr/1000057816.jpg" alt="Camera Color Capture" width="300"/>
+  <img src="scr/1000057812.jpg" alt="Filament Tag Generator - Main Screen" width="300"/>
 </div>
 
 ## Features
 
-- 📷 **Camera Color Picker** - Extract colors directly from filament spools using your device camera
-- 🎨 **Advanced HSV Color Picker** - Precise color selection with hue, saturation, and brightness controls
-- 🏷️ **NFC Tag Writing** - Write filament information to NFC tags using Web NFC API
-- 📱 **Mobile-Optimized** - Touch-friendly interface designed for mobile devices
-- 🌡️ **Temperature Presets** - Quick selection of common printing temperatures
+### 🏷️ **NFC Tag Writing**
+Write filament information to NFC tags using Web NFC API
+
+### 📱 **Mobile-Optimized**
+Touch-friendly interface designed for mobile devices
+
+### 📷 **Camera Color Picker**
+Extract colors directly from filament spools using your device camera
+
+<div align="center">
+  <img src="scr/1000057818.jpg" alt="Camera Color Capture" width="300"/>
+</div>
+
+### 🎨 **Advanced HSV Color Picker**
+Precise color selection with hue, saturation, and brightness controls
+
+<div align="center">
+  <img src="scr/1000057816.jpg" alt="Color Picker Interface" width="300"/>
+</div>
+
+### 📦 **Filaments and Temperature Presets based on market's data**
+
+<div align="center">
+  <img src="scr/1000057814.jpg" alt="Material Type Selection" width="300"/>
+</div>
 
 ## Usage
 
