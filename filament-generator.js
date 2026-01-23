@@ -118,16 +118,19 @@ const filamentGenerator = {
       ? `Generic ${material} ${cleanSubtype}`
       : `Generic ${material}`;
 
-    // CHECK 1: Is this a Real Profile?
+    // Debugging
+    console.log(`Checking profile: "${exactProfileName}"`);
+
+    // CHECK 1: Is this a Real Profile? (Green)
     if (this.filamentProfiles.includes(exactProfileName)) {
       return {
         inherits: exactProfileName,
-        isValid: true, // Exact match = Green
+        isValid: true,
         suggestion: null
       };
     }
 
-    // If not an exact match, we look for a "Similar" profile
+    // If not an exact match, we look for a "Similar" profile (Yellow)
     let similarProfile = null;
     let lookupKeyFull = cleanSubtype ? `${material} ${cleanSubtype}` : material;
 
@@ -142,18 +145,20 @@ const filamentGenerator = {
 
     // Validate the similar profile exists in our real profiles list
     if (similarProfile && this.filamentProfiles.includes(similarProfile)) {
+      // CRITICAL: Ensure we flag this as INVALID (Yellow) because it's not an exact match
+      // Even if similarProfile is a valid profile, it's not the EXACT profile requested.
       return {
         inherits: similarProfile,
-        isValid: false, // Similar match = Yellow/Warning
-        suggestion: `Profile "${exactProfileName}" not found. Selected similar: "${similarProfile}".`
+        isValid: false, 
+        suggestion: `Exact profile "${exactProfileName}" not found. Using compatible: "${similarProfile}".`
       };
     }
 
-    // CHECK 4: Fallback
+    // CHECK 4: Fallback (Yellow/Red)
     return {
       inherits: 'Generic PETG',
       isValid: false,
-      suggestion: `Profile not found for "${lookupKeyFull}". Using fallback: "Generic PETG".`
+      suggestion: `No compatible profile found for "${lookupKeyFull}". Defaulting to: "Generic PETG".`
     };
   },
 
@@ -177,13 +182,14 @@ const filamentGenerator = {
     const avgBed = Math.round((minBed + maxBed) / 2);
 
     // Build filament name
-    // If type is "Basic", we don't append it to the name, unless you want "PLA Basic"
-    // Usually "Basic" is omitted in names.
     const cleanType = (type && type !== 'Basic') ? type : '';
     const filamentName = `${brand} ${material}${cleanType ? ' ' + cleanType : ''}`;
 
     // Get validated inherits value using Material AND Type
     const inheritData = this.getValidInherits(material, type);
+
+    // Debugging
+    console.log(`Validation result for ${filamentName}:`, inheritData);
 
     return {
       json: {
