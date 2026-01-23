@@ -13,17 +13,17 @@ const OpenSpool = {
     const data = {
       protocol: "openspool",
       version: "1.0",
-      type: formData.material || formData.materialType,
-      color_hex: (formData.colorHex || formData.color_hex || '#FFFFFF').replace('#', '').toUpperCase()
+      type: formData.materialType,
+      color_hex: formData.colorHex.replace('#', '').toUpperCase()
     };
 
     // Add optional fields only if provided
     if (formData.brand) data.brand = formData.brand;
-    if (formData.subtype || formData.type) data.subtype = formData.subtype || formData.type;
-    if (formData.minNozzle || formData.minTemp) data.min_temp = parseInt(formData.minNozzle || formData.minTemp);
-    if (formData.maxNozzle || formData.maxTemp) data.max_temp = parseInt(formData.maxNozzle || formData.maxTemp);
-    if (formData.minBed || formData.bedTempMin) data.bed_min_temp = parseInt(formData.minBed || formData.bedTempMin);
-    if (formData.maxBed || formData.bedTempMax) data.bed_max_temp = parseInt(formData.maxBed || formData.bedTempMax);
+    if (formData.subtype) data.subtype = formData.subtype;
+    if (formData.minTemp) data.min_temp = parseInt(formData.minTemp);
+    if (formData.maxTemp) data.max_temp = parseInt(formData.maxTemp);
+    if (formData.bedTempMin) data.bed_min_temp = parseInt(formData.bedTempMin);
+    if (formData.bedTempMax) data.bed_max_temp = parseInt(formData.bedTempMax);
 
     return data;
   },
@@ -101,45 +101,65 @@ const OpenSpool = {
 },
 
   /**
+   * Download OpenSpool data as JSON file
+   * @param {Object} data - OpenSpool data object
+   * @param {string} filename - Output filename
+   */
+  downloadNFCJSON(data, filename = 'openspool.json') {
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  },
+
+  /**
+   * Parse OpenSpool from JSON text or buffer
+   * @param {string|ArrayBuffer} buffer - JSON text or binary data
+   * @returns {Object|null} Parsed form data or null on error
+   */
+  readFromBuffer(buffer) {
+    try {
+      const text = typeof buffer === 'string' 
+        ? buffer 
+        : new TextDecoder().decode(buffer);
+      
+      const jsonData = JSON.parse(text);
+      return this.parseData(jsonData);
+    } catch (e) {
+      console.error('Error reading OpenSpool JSON:', e);
+      return null;
+    }
+  },
+
+  /**
    * Calculate the size needed for NDEF encoding
-   * Accepts either form data or OpenSpool data object
-   * @param {Object} dataOrForm - Form data or OpenSpool data object
+   * @param {Object} data - OpenSpool data object
    * @returns {number} Size in bytes
    */
-  calculateRecordSize(dataOrForm) {
-    // If input looks like form data (has minNozzle/minTemp), generate OpenSpool data first
-    let data = dataOrForm;
-    
-    if (dataOrForm.minNozzle !== undefined || dataOrForm.minTemp !== undefined) {
-      try {
-        data = this.generateData(dataOrForm);
-      } catch (e) {
-        console.error('Error generating data in calculateRecordSize:', e);
-        return 0;
-      }
-    }
+  calculateRecordSize(data) {
+    const jsonStr = JSON.stringify(data);
+    const encoder = new TextEncoder();
+    const payload = encoder.encode(jsonStr);
 
-    try {
-      const jsonStr = JSON.stringify(data);
-      const encoder = new TextEncoder();
-      const payload = encoder.encode(jsonStr);
+    // NDEF record structure:
+    // 1 byte: header
+    // 1 byte: type length (16 = "application/json")
+    // 1 byte: payload length (short form, <256 bytes)
+    // 16 bytes: media type "application/json"
+    // N bytes: payload
 
-      // NDEF record structure:
-      // 1 byte: header
-      // 1 byte: type length (16 = "application/json")
-      // 1 byte: payload length (short form, <256 bytes)
-      // 16 bytes: media type "application/json"
-      // N bytes: payload
+    const mediaType = "application/json";
+    const headerSize = 3; // header + type_length + payload_length (short form)
+    const mediaTypeLength = mediaType.length;
+    const payloadLength = payload.byteLength;
 
-      const mediaType = "application/json";
-      const headerSize = 3; // header + type_length + payload_length (short form)
-      const mediaTypeLength = mediaType.length;
-      const payloadLength = payload.byteLength;
-
-      return headerSize + mediaTypeLength + payloadLength;
-    } catch (e) {
-      console.error('Error calculating record size:', e);
-      return 0;
-    }
+    return headerSize + mediaTypeLength + payloadLength;
   }
 };
