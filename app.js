@@ -753,7 +753,6 @@ const app = {
                   swatch.onclick = () => {
                         input.value = color.toUpperCase();
                         this.updateColor(color);
-                        this.updateJsonPreview();
                   };
                   palette.appendChild(swatch);
             });
@@ -839,7 +838,6 @@ const app = {
             const hex = document.getElementById('spectrumHexDisplay').textContent;
             document.getElementById('colorHex').value = hex;
             this.updateColor(hex);
-            this.updateJsonPreview();
             this.closeColorPicker();
       },
 
@@ -1251,7 +1249,6 @@ const app = {
             const hex = this.cameraCaptureColor.hex;
             document.getElementById('colorHex').value = hex;
             this.updateColor(hex);
-            this.updateJsonPreview();
             this.closeCameraPicker();
       },
 
