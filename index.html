@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filament Tag Generator</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent: #ff6b35;
+            --accent-hover: #ff8555;
+            --border: #444;
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        header a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        button:disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #4d4d4d;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .nfc-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .nfc-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--error);
+        }
+
+        .nfc-indicator.ready {
+            background: var(--success);
+        }
+
+        .status-message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .status-message.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .status-message.warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .info-box {
+            padding: 0.75rem;
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 35px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.selected {
+            border-color: var(--accent);
+            border-width: 3px;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        .collapsible:hover {
+            background: #4d4d4d;
+        }
+
+        .collapsible-icon {
+            transition: transform 0.2s;
+        }
+
+        .collapsible.collapsed .collapsible-icon {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+        }
+
+        .decoded-data {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+
+            .form-row,
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .color-palette {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        #spectrumHue,
+        #spectrumHueSlider {
+            touch-action: none;
+        }
+
+        /* Color Spectrum Picker */
+        .color-spectrum-modal {
+            display: none;
+            /* Скрыто по умолчанию */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-spectrum-modal.show {
+            display: flex !important;
+        }
+
+        .color-spectrum-picker {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .spectrum-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .spectrum-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: block;
+            font-weight: 500;
+        }
+
+        .spectrum-hue {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(to right,
+                    #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff0000);
+            border-radius: 4px;
+            cursor: crosshair;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .spectrum-hue-slider {
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: white;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .spectrum-sv {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg,
+                    white 0%,
+                    var(--spectrum-hue-color, #ff0000) 50%,
+                    black 100%);
+            border-radius: 4px;
+            cursor: crosshair;
+            position: relative;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .spectrum-sv-pointer {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-6px, -6px);
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .spectrum-sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .slider-group label {
+            min-width: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            border: none;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-tertiary);
+        }
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-group input[type="text"] {
+            width: 60px;
+            padding: 0.4rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-family: monospace;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text-primary);
+        }
+
+        .spectrum-preview {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .spectrum-preview-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            background: var(--spectrum-color, #ffffff);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .spectrum-preview-text {
+            flex: 1;
+        }
+
+        .spectrum-preview-text div {
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .spectrum-preview-text strong {
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .spectrum-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .spectrum-buttons button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .spectrum-buttons .btn-ok {
+            background: var(--accent);
+            color: white;
+        }
+
+        .spectrum-buttons .btn-ok:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .spectrum-buttons .btn-cancel {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .spectrum-buttons .btn-cancel:hover {
+            background: var(--border);
+        }
+
+        /* На мобильных устройствах */
+        @media (max-width: 640px) {
+            .color-picker-modal {
+                width: 95vw !important;
+                max-height: 95vh !important;
+                padding: 16px !important;
+            }
+
+            .spectrum-sv {
+                height: 150px;
+            }
+
+            .spectrum-preview-text div {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🧵 Filament Tag Generator</h1>
+        <p>
+            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a> &
+            <a href="https://specs.openprinttag.org/" target="_blank">OpenPrintTag</a> formats
+        </p>
+    </header>
+
+    <div class="container">
+        <!-- Mode Selection -->
+        <div id="modeSelection" class="section">
+            <h2 class="section-title">What would you like to do?</h2>
+            <div class="button-group" style="margin-top: 2rem;">
+                <button class="btn-success" onclick="app.setMode('read')" style="padding: 2rem;">
+                    📖 Read / Update Tag
+                </button>
+                <button class="btn-success" onclick="app.setMode('create')" style="padding: 2rem;">
+                    ✏️ Create New Tag
+                </button>
+            </div>
+        </div>
+
+        <!-- Read Section -->
+        <div id="readSection" class="section hidden">
+            <h2 class="section-title">📖 Read NFC Tag or Upload File</h2>
+
+            <div class="nfc-status">
+                <div class="nfc-indicator" id="nfcIndicator"></div>
+                <span id="nfcStatusText">Checking NFC...</span>
+            </div>
+
+            <button id="scanBtn" class="btn-success" onclick="app.toggleScan()">Start Scanning</button>
+
+            <div class="status-message" id="readStatus"></div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label>Or Upload File</label>
+                <input type="file" id="fileInput" accept=".json,.bin">
+                <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                    Supports .json (OpenSpool)
+                </small>
+            </div>
+
+            <div id="decodedDataContainer" class="hidden" style="margin-top: 1rem;">
+                <label>Decoded Data</label>
+                <div class="decoded-data" id="decodedData"></div>
+            </div>
+
+            <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
+        </div>
+
+        <!-- Form Section -->
+        <div id="formSection" class="section hidden">
+            <h2 class="section-title">✏️ <span id="formTitle">Create New Tag</span></h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="materialTypeInput">Material Type</label>
+                    <input type="text" id="materialTypeInput" list="materialList" placeholder="Select or type material"
+                        class="full-width" onchange="app.applyTemperaturePreset()">
+                    <datalist id="materialList">
+                        <option value="PLA">
+                        <option value="PETG">
+                        <option value="ABS">
+                        <option value="ASA">
+                        <option value="BVOH">
+                        <option value="easyPETG">
+                        <option value="ecoPLA">
+                        <option value="HIPS">
+                        <option value="PA">
+                        <option value="PA6">
+                        <option value="PA12">
+                        <option value="PC">
+                        <option value="PEBA">
+                        <option value="PEI">
+                        <option value="PEEK">
+                        <option value="PP">
+                        <option value="PCTG">
+                        <option value="PVA">
+                        <option value="TPE">
+                        <option value="TPU">
+                            <!-- CF Variants -->
+                        <option value="ABS-CF">
+                        <option value="ASA-CF">
+                        <option value="easyPETG-CF">
+                        <option value="ecoPLA-CF">
+                        <option value="ePAHT-CF">
+                        <option value="HIPS-CF">
+                        <option value="PA-CF">
+                        <option value="PA6-CF">
+                        <option value="PA12-CF">
+                        <option value="PEBA-CF">
+                        <option value="PEI-CF">
+                        <option value="PEEK-CF">
+                        <option value="PETG-CF">
+                        <option value="PC-CF">
+                        <option value="PP-CF">
+                        <option value="PCTG-CF">
+                        <option value="TPE-CF">
+                        <option value="TPU-CF">
+                            <!-- GF Variants -->
+                        <option value="ABS-GF">
+                        <option value="ASA-GF">
+                        <option value="easyPETG-GF">
+                        <option value="ecoPLA-GF">
+                        <option value="PA-GF">
+                        <option value="PA6-GF">
+                        <option value="PA12-GF">
+                        <option value="PEBA-GF">
+                        <option value="PEI-GF">
+                        <option value="PEEK-GF">
+                        <option value="PETG-GF">
+                        <option value="PC-GF">
+                        <option value="PP-GF">
+                        <option value="PCTG-GF">
+                        <option value="TPE-GF">
+                        <option value="TPU-GF">
+                            <!-- Special -->
+                        <option value="Carbon-Graphene">
+                        <option value="Metal-Brass">
+                        <option value="Metal-Bronze">
+                        <option value="Metal-Copper">
+                        <option value="Nylon-Hydrophobic-CF">
+                        <option value="Stone">
+                        <option value="Wood">
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label for="subTypeInput">Type</label>
+                    <input type="text" id="subTypeInput" list="subTypeList" placeholder="Select or type subtype"
+                        class="full-width">
+                    <datalist id="subTypeList">
+                        <option value="Basic">
+                        <option value="Glitter">
+                        <option value="Matte Finish">
+                        <option value="Translucent">
+                        <option value="Transparent">
+                        <option value="Rainbow">
+                        <option value="Silk Finish">
+                    </datalist>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Color 1 (Primary)</label>
+                <div class="color-palette" id="colorPalette"></div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="text" id="colorHex" maxlength="7" placeholder="#FFFFFF" pattern="#?[0-9A-Fa-f]{6}">
+
+                    <div id="colorPreview" onclick="app.toggleColorPicker()" style="width: 60px; height: 40px; border-radius: 4px;
+                                border: 2px solid var(--border); background: #FFFFFF;
+                                cursor: pointer; touch-action: manipulation;">
+                    </div>
+
+                    <!-- Color Spectrum Picker Modal -->
+                    <div id="colorSpectrumModal" class="color-spectrum-modal hidden"
+                        onclick="if(event.target === this) app.closeColorPicker()">
+                        <div class="color-spectrum-picker">
+                            <h3 style="margin-top: 0; margin-bottom: 1.5rem; color: var(--text-primary);">Select Color
+                            </h3>
+
+                            <!-- HUE Slider -->
+                            <div class="spectrum-container">
+                                <label class="spectrum-label">Hue</label>
+                                <div class="spectrum-hue" id="spectrumHue">
+                                    <div class="spectrum-hue-slider" id="spectrumHueSlider"></div>
+                                </div>
+                            </div>
+
+                            <!-- Saturation & Value Picker -->
+                            <div class="spectrum-container">
+                                <label class="spectrum-label">Brightness & Saturation</label>
+                                <div class="spectrum-sv" id="spectrumSV">
+                                    <div class="spectrum-sv-pointer" id="spectrumSVPointer"></div>
+                                </div>
+                            </div>
+
+                            <!-- RGB Sliders -->
+                            <div class="spectrum-sliders">
+                                <label class="spectrum-label">RGB</label>
+                                <div class="slider-group">
+                                    <label>R:</label>
+                                    <input type="range" id="spectrumR" min="0" max="255" value="255">
+                                    <input type="text" id="spectrumRText" maxlength="3" value="255">
+                                </div>
+                                <div class="slider-group">
+                                    <label>G:</label>
+                                    <input type="range" id="spectrumG" min="0" max="255" value="255">
+                                    <input type="text" id="spectrumGText" maxlength="3" value="255">
+                                </div>
+                                <div class="slider-group">
+                                    <label>B:</label>
+                                    <input type="range" id="spectrumB" min="0" max="255" value="255">
+                                    <input type="text" id="spectrumBText" maxlength="3" value="255">
+                                </div>
+                            </div>
+
+                            <!-- Preview -->
+                            <div class="spectrum-preview">
+                                <div class="spectrum-preview-box" id="spectrumPreviewBox"></div>
+                                <div class="spectrum-preview-text">
+                                    <div>HEX: <strong id="spectrumHexDisplay">#FFFFFF</strong></div>
+                                    <div>RGB: <strong id="spectrumRgbDisplay">rgb(255, 255, 255)</strong></div>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="spectrum-buttons">
+                                <button class="btn-ok" onclick="app.confirmColorPicker()">✓ OK</button>
+                                <button class="btn-cancel" onclick="app.closeColorPicker()">✕ Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                    Enter hex color (e.g., FF5733, #FF5733)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="brandInput">Brand Name</label>
+                <input type="text" id="brandInput" list="brandList" placeholder="Select or type a brand"
+                    class="full-width">
+                <datalist id="brandList">
+                    <option value="Generic">
+                    <option value="Bambu Lab">
+                    <option value="eSun">
+                    <option value="Polymaker">
+                    <option value="Hatchbox">
+                    <option value="Overture">
+                    <option value="SUNLU">
+                    <option value="Prusament">
+                    <option value="Jayo">
+                        <!-- The specific brands you requested -->
+                    <option value="3DJake">
+                    <option value="Anycubic">
+                    <option value="AzureFilm">
+                    <option value="ColorFabb">
+                    <option value="Elegoo">
+                    <option value="Extrudr">
+                    <option value="Fiberlogy">
+                    <option value="Fillamentum">
+                    <option value="FormFutura">
+                    <option value="Geeetech">
+                    <option value="Kimya">
+                    <option value="Spectrum">
+                </datalist>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Nozzle Temp (°C)</label>
+                    <input type="number" id="minTemp" placeholder="220" value="220">
+                </div>
+                <div class="form-group">
+                    <label>Max Nozzle Temp (°C)</label>
+                    <input type="number" id="maxTemp" placeholder="240" value="240">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Min Bed Temp (°C)</label>
+                    <input type="number" id="bedTempMin" placeholder="50">
+                </div>
+                <div class="form-group">
+                    <label>Max Bed Temp (°C)</label>
+                    <input type="number" id="bedTempMax" placeholder="60">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" onclick="app.downloadFile()">💾 Download File</button>
+                <button id="writeBtn" class="btn-success" onclick="app.toggleWrite()">📝 Write to NFC</button>
+            </div>
+
+            <div class="info-box" id="recordSizeInfo"
+                style="margin-top: 0.5rem; background: rgba(76, 175, 80, 0.1); border-color: var(--success);">
+                📊 <strong>NDEF Record Size:</strong> <span id="recordSize">?</span>
+            </div>
+
+            <div class="status-message" id="writeStatus"></div>
+
+            <button class="btn-secondary" onclick="app.setMode('menu')">← Back to Menu</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>
+            Filament Tag Generator - Supporting
+            <a href="https://openspool.io/rfid.html" target="_blank">OpenSpool</a> &
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            © 2025 <a href="https://github.com/paxx12/" target="_blank">paxx12</a> - Open Source Project
+        </p>
+    </footer>
+
+    <script src="openspool.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
